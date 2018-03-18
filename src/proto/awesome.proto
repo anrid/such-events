@@ -1,0 +1,21 @@
+package awesomepackage;
+syntax = "proto3";
+
+message AwesomeMessage {
+  string awesome_field = 1; // becomes awesomeField
+  int32 awesome_number = 2;
+  Type awesome_type = 3;
+  repeated AwesomeFile awesome_files = 4;
+
+  enum Type {
+    LINK = 0;
+    IMAGE = 1;
+    VIDEO = 2;
+  }
+
+  message AwesomeFile {
+    string url = 1;
+    string filename = 2;
+    repeated string comments = 3;
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "tslint.enable": true,
+  "tslint.run": "onType",
+  "tslint.jsEnable": false,
+  "editor.tabSize": 2
+}

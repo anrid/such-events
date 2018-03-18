@@ -1,0 +1,95 @@
+version: '3.3'
+
+services:
+  orient:
+    image: orientdb:latest
+    hostname: orientdb
+    ports:
+      - "2424:2424"
+      - "2480:2480"
+    environment:  
+      - ORIENTDB_ROOT_PASSWORD=root
+    volumes:
+      - orientdb-data:/orientdb/databases
+      - orientdb-backup:/orientdb/backup
+    networks:
+      - network
+
+  nats-main:
+    image: nats-streaming:latest
+    hostname: nats-main
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    entrypoint:
+      - /nats-streaming-server
+      - --cluster_id
+      - awesome-cluster
+      - --store
+      - FILE
+      - --dir
+      - /data/nats
+      - --hb_interval
+      - '30s'
+      - --debug=true
+    volumes:
+      - nats-data:/data/nats
+    networks:
+      - network
+
+  # mongo:
+  #   image: mongo:latest
+  #   hostname: mongo
+  #   ports:
+  #     - "27017:27017"
+  #   volumes:
+  #     - mongo-data:/data/db
+  #   networks:
+  #     - network
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.2.2
+    hostname: elasticsearch
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - xpack.security.enabled=false
+      - xpack.monitoring.enabled=false
+      - xpack.ml.enabled=false
+      - xpack.graph.enabled=false
+      - xpack.watcher.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      # - logger.org.elasticsearch.transport=debug
+      # - logger.org.elasticsearch.indices=debug
+      # - logger.org.elasticsearch.cluster=debug
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - es-data:/usr/share/elasticsearch/data
+    networks:
+      - network
+
+volumes:
+  orientdb-data:
+    external:
+      name: orientdb-data-volume
+  orientdb-backup:
+    external:
+      name: orientdb-backup-volume
+  nats-data:
+    external:
+      name: nats-volume
+  # mongo-data:
+  #   external:
+  #     name: mongo-volume
+  es-data:
+    external:
+      name: es-volume
+
+networks:
+  network:

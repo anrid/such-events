@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es6",
+    "noImplicitAny": false,
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "sourceMap": false,
+    "rootDir": "src",
+    "outDir": "dist",
+    "jsx": "react",
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "allowSyntheticDefaultImports": true,
+    "lib": [
+      "dom",
+      "es2017"
+    ],
+  }
+}
