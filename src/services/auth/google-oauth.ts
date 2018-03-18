@@ -9,18 +9,18 @@ import * as Joi from 'joi'
 import { createAccessToken } from '../../lib/jwt'
 import { L } from '../../lib/logger'
 
-Assert(process.env.TW_SEARCH_GOOGLE_CLIENT_ID, 'Missing env TW_SEARCH_GOOGLE_CLIENT_ID')
-Assert(process.env.TW_SEARCH_GOOGLE_CLIENT_SECRET, 'Missing env TW_SEARCH_GOOGLE_CLIENT_SECRET')
+Assert(process.env.SUCH_EVENTS_GOOGLE_CLIENT_ID, 'Missing env SUCH_EVENTS_GOOGLE_CLIENT_ID')
+Assert(process.env.SUCH_EVENTS_GOOGLE_CLIENT_SECRET, 'Missing env SUCH_EVENTS_GOOGLE_CLIENT_SECRET')
 
 function getGoogleOAuthClient () {
-  const redirectUrl = `${process.env.TW_SEARCH_URL}/google/oauth2callback`
+  const redirectUrl = `${process.env.SUCH_EVENTS_URL}/google/oauth2callback`
   const OAuth2 = google.auth.OAuth2
   const oauth2Client = new OAuth2(
-    process.env.TW_SEARCH_GOOGLE_CLIENT_ID,
-    process.env.TW_SEARCH_GOOGLE_CLIENT_SECRET,
+    process.env.SUCH_EVENTS_GOOGLE_CLIENT_ID,
+    process.env.SUCH_EVENTS_GOOGLE_CLIENT_SECRET,
     redirectUrl,
   )
-  L.info('Google client id: %s', process.env.TW_SEARCH_GOOGLE_CLIENT_ID)
+  L.info('Google client id: %s', process.env.SUCH_EVENTS_GOOGLE_CLIENT_ID)
   L.info('Google redirect url: %s', redirectUrl)
   return oauth2Client
 }

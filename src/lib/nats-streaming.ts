@@ -4,7 +4,7 @@ import * as Stan from 'node-nats-streaming'
 import { generate } from 'shortid'
 import { L } from './logger'
 
-Assert(process.env.TW_SEARCH_NATS_CLUSTER_NAME, 'Missing env TW_SEARCH_NATS_CLUSTER_NAME')
+Assert(process.env.SUCH_EVENTS_NATS_CLUSTER_NAME, 'Missing env SUCH_EVENTS_NATS_CLUSTER_NAME')
 const EVENT_SOURCE_SUBJECT = 'tw-event-source'
 let _conn: Stan.Stan
 
@@ -21,7 +21,7 @@ export function getConnection (clientId: string | null): Promise<Stan.Stan> {
     })
     nc.on('close', () => L.info('NATS: action=close'))
 
-    const clusterId = process.env.TW_SEARCH_NATS_CLUSTER_NAME
+    const clusterId = process.env.SUCH_EVENTS_NATS_CLUSTER_NAME
     L.info(`NATS: action=connecting cluster=${clusterId} id=${id} ..`) 
     _conn = Stan.connect(clusterId, id, { nc })
 

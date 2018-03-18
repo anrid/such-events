@@ -5,8 +5,8 @@ import {
   ObjectId,
 } from 'mongodb'
 
-Assert(process.env.TW_SEARCH_PROD_DB, 'Missing env TW_SEARCH_PROD_DB')
-Assert(process.env.TW_SEARCH_LOCAL_DB, 'Missing env TW_SEARCH_LOCAL_DB')
+Assert(process.env.SUCH_EVENTS_PROD_DB, 'Missing env SUCH_EVENTS_PROD_DB')
+Assert(process.env.SUCH_EVENTS_LOCAL_DB, 'Missing env SUCH_EVENTS_LOCAL_DB')
 
 let remote
 let local
@@ -14,8 +14,8 @@ let local
 export async function getConnection () {
   if (!remote) {
     remote = await connect(
-      process.env.TW_SEARCH_PROD_DB,
-      getDbName(process.env.TW_SEARCH_PROD_DB),
+      process.env.SUCH_EVENTS_PROD_DB,
+      getDbName(process.env.SUCH_EVENTS_PROD_DB),
     )
   }
   return remote
@@ -24,8 +24,8 @@ export async function getConnection () {
 export async function getLocalConnection () {
   if (!local) {
     local = await connect(
-      process.env.TW_SEARCH_LOCAL_DB,
-      getDbName(process.env.TW_SEARCH_LOCAL_DB),
+      process.env.SUCH_EVENTS_LOCAL_DB,
+      getDbName(process.env.SUCH_EVENTS_LOCAL_DB),
     )
   }
   return local

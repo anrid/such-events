@@ -8,9 +8,9 @@ import { jwtMiddleware } from '../../lib/jwt'
 import * as Gateway from './gateway'
 import { L } from '../../lib/logger'
 
-Assert(process.env.TW_SEARCH_HOST, 'Missing env TW_SEARCH_HOST')
-Assert(process.env.TW_SEARCH_TLS_CERT, 'Missing env TW_SEARCH_TLS_CERT')
-Assert(process.env.TW_SEARCH_TLS_PRIVKEY, 'Missing env TW_SEARCH_TLS_PRIVKEY')
+Assert(process.env.SUCH_EVENTS_HOST, 'Missing env SUCH_EVENTS_HOST')
+Assert(process.env.SUCH_EVENTS_TLS_CERT, 'Missing env SUCH_EVENTS_TLS_CERT')
+Assert(process.env.SUCH_EVENTS_TLS_PRIVKEY, 'Missing env SUCH_EVENTS_TLS_PRIVKEY')
 
 // All API Gateways are expected to receive all tw-broadcast events.
 // const QUEUE_GROUP = null
@@ -57,8 +57,8 @@ export async function setupServer (opts: ServerOptions) {
 
   // Setup HTTPS server.
   const options = {
-    cert: Fs.readFileSync(process.env.TW_SEARCH_TLS_CERT),
-    key: Fs.readFileSync(process.env.TW_SEARCH_TLS_PRIVKEY),
+    cert: Fs.readFileSync(process.env.SUCH_EVENTS_TLS_CERT),
+    key: Fs.readFileSync(process.env.SUCH_EVENTS_TLS_PRIVKEY),
   }
 
   const server = Https.createServer(options, app)
@@ -67,7 +67,7 @@ export async function setupServer (opts: ServerOptions) {
     server.listen(opts.port, () => {
       L.info(
         'API gateway listening on https://%s:%s ..',
-        process.env.TW_SEARCH_HOST,
+        process.env.SUCH_EVENTS_HOST,
         opts.port,
       )
     })

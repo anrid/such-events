@@ -11,11 +11,11 @@ import * as Tw from './tw'
 import { L } from '../../lib/logger'
 import { getLocalConnection } from '../../lib/mongo'
 
-Assert(process.env.TW_SEARCH_HOST, 'Missing env TW_SEARCH_HOST')
-Assert(process.env.TW_SEARCH_PORT, 'Missing env TW_SEARCH_PORT')
-Assert(process.env.TW_SEARCH_URL, 'Missing env TW_SEARCH_URL')
-Assert(process.env.TW_SEARCH_TLS_CERT, 'Missing env TW_SEARCH_TLS_CERT')
-Assert(process.env.TW_SEARCH_TLS_PRIVKEY, 'Missing env TW_SEARCH_TLS_PRIVKEY')
+Assert(process.env.SUCH_EVENTS_HOST, 'Missing env SUCH_EVENTS_HOST')
+Assert(process.env.SUCH_EVENTS_PORT, 'Missing env SUCH_EVENTS_PORT')
+Assert(process.env.SUCH_EVENTS_URL, 'Missing env SUCH_EVENTS_URL')
+Assert(process.env.SUCH_EVENTS_TLS_CERT, 'Missing env SUCH_EVENTS_TLS_CERT')
+Assert(process.env.SUCH_EVENTS_TLS_PRIVKEY, 'Missing env SUCH_EVENTS_TLS_PRIVKEY')
 
 L.info('API server start:', Moment().format())
 
@@ -71,8 +71,8 @@ async function setupServer () {
 
   // Setup HTTPS server.
   const options = {
-    cert: Fs.readFileSync(process.env.TW_SEARCH_TLS_CERT),
-    key: Fs.readFileSync(process.env.TW_SEARCH_TLS_PRIVKEY),
+    cert: Fs.readFileSync(process.env.SUCH_EVENTS_TLS_CERT),
+    key: Fs.readFileSync(process.env.SUCH_EVENTS_TLS_PRIVKEY),
   }
   const httpsServer = Https.createServer(options, app)
 
@@ -87,11 +87,11 @@ async function setupServer () {
   })
 
   // Listen.
-  httpsServer.listen(process.env.TW_SEARCH_PORT, () => {
+  httpsServer.listen(process.env.SUCH_EVENTS_PORT, () => {
     L.info(
       'Server listening on https://%s:%s ..',
-      process.env.TW_SEARCH_HOST,
-      process.env.TW_SEARCH_PORT,
+      process.env.SUCH_EVENTS_HOST,
+      process.env.SUCH_EVENTS_PORT,
     )
   })
 }

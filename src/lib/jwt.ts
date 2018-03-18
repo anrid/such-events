@@ -3,11 +3,11 @@ import * as Fs from 'fs'
 import * as Jwt from 'jsonwebtoken'
 import { L } from './logger'
 
-Assert(process.env.TW_SEARCH_TLS_PRIVKEY, 'Missing env TW_SEARCH_TLS_PRIVKEY')
-Assert(process.env.TW_SEARCH_TLS_PUBKEY, 'Missing env TW_SEARCH_TLS_PUBKEY')
+Assert(process.env.SUCH_EVENTS_TLS_PRIVKEY, 'Missing env SUCH_EVENTS_TLS_PRIVKEY')
+Assert(process.env.SUCH_EVENTS_TLS_PUBKEY, 'Missing env SUCH_EVENTS_TLS_PUBKEY')
 
-const PRIVKEY = Fs.readFileSync(process.env.TW_SEARCH_TLS_PRIVKEY)
-const PUBKEY = Fs.readFileSync(process.env.TW_SEARCH_TLS_PUBKEY)
+const PRIVKEY = Fs.readFileSync(process.env.SUCH_EVENTS_TLS_PRIVKEY)
+const PUBKEY = Fs.readFileSync(process.env.SUCH_EVENTS_TLS_PUBKEY)
 
 export function createAccessToken (id: string, email: string) {
   // Sign with RSA SHA256

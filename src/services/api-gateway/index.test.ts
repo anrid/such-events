@@ -24,7 +24,7 @@ test('GET / test', async t => {
   t.equals(res.statusCode, 200, 'should get 200 OK')
 })
 
-test('GET /api/v1/echo', async t => {
+test('POST /api/v1/echo', async t => {
   t.plan(2)
   
   const res = await request(server.app)
@@ -56,7 +56,7 @@ test('GET /api/v1/unimplemented', async t => {
   t.equals(res.statusCode, Boom.badRequest().output.statusCode, 'should get bad request error')
 })
 
-test('GET /api/v1/signup', async t => {
+test('POST /api/v1/signup - timeout', async t => {
   t.plan(2)
   
   const res = await request(server.app)
