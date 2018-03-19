@@ -101,9 +101,11 @@ export function subscribeToEvents (conn: Stan.Stan, a: SubscriberOptions) {
   const handler = async (msg: Stan.Message) => {
     let e: EventMessage
     let publisher: Publisher
+    let msgData = null
     try {
       const timer = Date.now()
-      e = JSON.parse(msg.getData().toString())
+      msgData = msg.getData().toString()
+      e = JSON.parse(msgData)
 
       const handler = a.eventHandlers[e.event]
       if (!handler) return
@@ -112,15 +114,16 @@ export function subscribeToEvents (conn: Stan.Stan, a: SubscriberOptions) {
       await handler(e, publisher)
 
       L.info(
-        `NATS: client=${conn['clientId']} action=sub event=${e.event} ` +
-        `request=${e.requestId} took=${Date.now() - timer} ` +
+        `NATS: client=${conn['clientId']} action=sub ` +
+        `event=${e.event} request=${e.requestId} took=${Date.now() - timer} ` +
         `total=${e.requestCreated ? Date.now() - e.requestCreated : 0}`
       )
     } catch (err) {
+      const event = e ? e.event : 'none'
+      const requestOrMessage = e ? `request=${e.requestId}` : `msg=${msgData}`
       L.error(
         `NATS: client=${conn['clientId']} action=sub ` +
-        `event=${e ? e.event : 'none'} request=${e.requestId} error=`,
-        err
+        `event=${event} ${requestOrMessage} error=${err.message}`
       )
       if (publisher) {
         publisher(`${msg.getSubject()}:error`, { error: err.message })

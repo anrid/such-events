@@ -146,16 +146,16 @@ export async function run () {
     FROM Workspace
     WHERE owner.name = "Ace Base"
   `)
-  console.log(`Found ${r.length} workspaces:\n`, r)
+  console.log(
+    `Select all workspaces owned by Ace Base:\n` +
+    r.map(x => `- ${x.name} (owner: ${x.owner_name})`).join(`\n`)
+  )
 
   // Add workspace1 and workspace2 to user1’s workspaces set.
   // NOTE: Adding workspace2 several shouldn't have any effect since we've
   // declared a LinkSet type on the workspaces property.
   user1.workspaces = [workspace1['@rid'], workspace2['@rid'], workspace2['@rid'], workspace2['@rid']]
   await db.record.update(user1)
-
-  user1 = await db.record.get(user1)
-  console.log('User 1:', user1)
 
   // Add workspace2 to user2’s workspaces set.
   user2.workspaces = [workspace2['@rid']]
@@ -185,8 +185,8 @@ export async function run () {
       workspaces.name  AS workspace_name,
       workspaces.logo  AS workspace_logo
     FROM User
-    WHERE workspaces.name LIKE '%Startup%'
-    UNWIND workspace_id, workspace_name, workspace_logo
+    WHERE name IN ["Chase Case", "Ace Base"]
+    AND workspaces.name LIKE '%Startup'
   `)
   console.log(`Found ${r.length} users:\n`, r)
 
