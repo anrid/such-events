@@ -51,6 +51,7 @@
     "googleapis": "^27.0.0",
     "joi": "^13.1.2",
     "jsonwebtoken": "^8.2.0",
+    "minimist": "^1.2.0",
     "moment": "^2.21.0",
     "mongodb": "^3.0.4",
     "node-nats-streaming": "^0.0.28",

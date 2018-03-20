@@ -4,7 +4,6 @@ import {
   endpoint,
   validate,
 } from '../../lib/express-utils'
-import { Profile } from './index.d'
 import * as Joi from 'joi'
 import { createAccessToken } from '../../lib/jwt'
 import { L } from '../../lib/logger'
@@ -41,7 +40,7 @@ function getGoogleOAuthUrl (client) {
   })
 }
 
-function getUserProfile (client, code: string): Promise<Profile> {
+function getUserProfile (client, code: string): Promise<any> {
   return new Promise((resolve, reject) => {
     client.getToken(code, function (err, tokens) {
       // Now tokens contains an access_token and an optional refresh_token. Save them.

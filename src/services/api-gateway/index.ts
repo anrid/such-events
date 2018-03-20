@@ -20,7 +20,7 @@ process.on('unhandledRejection', reason => {
 })
 
 export async function setupServer (opts: ServerOptions) {
-  Assert(opts['client-id'], 'Missing --client-id flag. Each API gateway instance needs a persistent client id.')
+  Assert(opts.id, 'Missing --id flag. Each API gateway instance needs a unique id.')
 
   // Setup express.
   const app = Express()
@@ -98,6 +98,6 @@ if (require.main === module) {
 }
 
 interface ServerOptions {
-  'port'?: number,
-  'client-id': string,
+  id:    string
+  port?: number
 }

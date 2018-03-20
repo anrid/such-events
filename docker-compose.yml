@@ -7,6 +7,9 @@ services:
     ports:
       - "2424:2424"
       - "2480:2480"
+    entrypoint:
+      - /orientdb/bin/server.sh
+      - -Dlog.console.level=FINEST
     environment:  
       - ORIENTDB_ROOT_PASSWORD=root
     volumes:
@@ -31,7 +34,10 @@ services:
       - /data/nats
       - --hb_interval
       - '30s'
-      - --debug=true
+      - --debug=false
+      - --file_compact_enabled=true
+      - --file_compact_min_size
+      - '100mb'
     volumes:
       - nats-data:/data/nats
     networks:

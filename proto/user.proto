@@ -1,14 +1,15 @@
 package tw;
 syntax = "proto3";
 
-message CreateUserMessage {
+message CreateUser {
   required string name = 1;
   required string email = 2;
   required string password = 3;
 }
 
-message CreateUserOkMessage {
+message CreateUserOk {
   required UserInfo user = 1;
+  
   message UserInfo {
     required string name = 1;
     required string email = 2;

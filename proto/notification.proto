@@ -1,0 +1,13 @@
+package tw;
+syntax = "proto3";
+
+message CreateNotificationOk {
+  required Notification notification = 1;
+}
+
+message Notification {
+  required string id = 1;
+  required string from = 2;
+  required string to = 3;
+  string message = 4;
+}

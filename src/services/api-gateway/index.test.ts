@@ -8,10 +8,10 @@ let server
 let echo
 
 test('before tests', async t => {
-  // Setup server and connect to NATS.
-  server = await Server.setupServer({ 'client-id': 'test-api1' })
+  // Setup server.
+  server = await Server.setupServer({ id: 'test-api-gateway-1' })
   // Setup echo responder.
-  echo = await Echo.setupServer({ 'client-id': 'test-echo1' })
+  echo = await Echo.service
   t.end()
 })
 
@@ -32,7 +32,7 @@ test('POST /api/v1/echo', async t => {
   .accept('json')
   .send({ ok: 1 })
 
-  t.equals(res.body.ok, 1, 'should get a JSON response with ok = 1')
+  t.equals(res.body.payload.ok, 1, 'should get a JSON response with ok = 1')
   t.equals(res.statusCode, 200, 'should get 200 OK')
 })
 

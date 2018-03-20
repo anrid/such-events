@@ -53,8 +53,9 @@ export async function run () {
   const Team = await db.class.create('Team', 'V')
   console.log(`Created class ${Team.name} (${Team.superClass}).`)
 
+  //
   // Create User class properties.
-
+  //
   r = await User.property.create([
     { name: 'name', type: 'String', notNull: true },
     { name: 'email', type: 'String', notNull: true },
@@ -62,33 +63,36 @@ export async function run () {
     { name: 'photo', type: 'String' },
     { name: 'created', type: 'DateTime' },
     { name: 'updated', type: 'DateTime' },
-    { name: 'workspaces', type: 'LinkSet', linkedClass: 'Workspace' },
-    { name: 'teams', type: 'LinkSet', linkedClass: 'Team' },
+    // { name: 'workspaces', type: 'LinkSet', linkedClass: 'Workspace' },
+    // { name: 'teams', type: 'LinkSet', linkedClass: 'Team' },
     { name: 'isActive', type: 'Boolean', default: true },
   ])
-  // console.log(`User properties:\n - ${r.map(x => `${x.name} (type: ${x.type})`).join('\n - ')}`)
 
+  // 
   // Create Workspace class properties.
+  //
   r = await Workspace.property.create([
     { name: 'name', type: 'String', notNull: true },
     { name: 'logo', type: 'String' },
     { name: 'created', type: 'DateTime' },
     { name: 'updated', type: 'DateTime' },
-    { name: 'owner', type: 'Link', linkedClass: 'User', notNull: true },
-    { name: 'members', type: 'LinkSet', linkedClass: 'User' },
-    { name: 'admins', type: 'LinkSet', linkedClass: 'User' },
+    // { name: 'owner', type: 'Link', linkedClass: 'User', notNull: true },
+    // { name: 'members', type: 'LinkSet', linkedClass: 'User' },
+    // { name: 'admins', type: 'LinkSet', linkedClass: 'User' },
     { name: 'isActive', type: 'Boolean', default: true },
   ])
   // console.log(`Workspace properties:\n - ${r.map(x => `${x.name} (type: ${x.type})`).join('\n - ')}`)
 
+  //
   // Create Team class properties.
+  //
   r = await Team.property.create([
     { name: 'name', type: 'String', notNull: true },
     { name: 'created', type: 'DateTime' },
     { name: 'updated', type: 'DateTime' },
-    { name: 'teamLead', type: 'Link', linkedClass: 'User' },
-    { name: 'members', type: 'LinkSet', linkedClass: 'User' },
-    { name: 'admins', type: 'LinkSet', linkedClass: 'User' },
+    // { name: 'teamLead', type: 'Link', linkedClass: 'User' },
+    // { name: 'members', type: 'LinkSet', linkedClass: 'User' },
+    // { name: 'admins', type: 'LinkSet', linkedClass: 'User' },
   ])
   // console.log(`Team properties:\n - ${r.map(x => `${x.name} (type: ${x.type})`).join('\n - ')}`)
 
@@ -113,12 +117,20 @@ export async function run () {
   })
   console.log(`Created user ${user2.name} (id: ${getId(user2)}.`)
 
+  let user3 = await User.create.call(User, {
+    name: 'Massa Man',
+    email: 'massa.man@example.com',
+    photo: 'https://cdn.com/123/user3-photo.jpg',
+    created: new Date(),
+    updated: new Date(),
+  })
+  console.log(`Created user ${user3.name} (id: ${getId(user3)}.`)
+
   let workspace1 = await Workspace.create.call(Workspace, {
     name: 'Ace’s Space',
     logo: 'https://cdn.com/123/456.jpg',
     created: new Date(),
     updated: new Date(),
-    owner: user1['@rid'],
   })
   console.log(`Created workspace1 ${workspace1.name} (id: ${getId(workspace1)}).`)
 
@@ -127,9 +139,26 @@ export async function run () {
     logo: 'https://cdn.com/123/789.jpg',
     created: new Date(),
     updated: new Date(),
-    owner: user1['@rid'],
   })
   console.log(`Created workspace2 ${workspace2.name} (id: ${getId(workspace2)}).`)
+
+  // Create basic relationship edges.
+  await db.class.create('WorkspaceOwner', 'E')
+  await db.class.create('WorkspaceAdmin', 'E')
+  await db.class.create('WorkspaceMember', 'E')
+
+  // user1 owns both workspaces and is the only admin.
+  await db.create('EDGE', 'WorkspaceOwner').from(getId(user1)).to(getId(workspace1)).one()
+  await db.create('EDGE', 'WorkspaceOwner').from(getId(user1)).to(getId(workspace2)).one()
+  await db.create('EDGE', 'WorkspaceAdmin').from(getId(user1)).to(getId(workspace1)).one()
+  await db.create('EDGE', 'WorkspaceAdmin').from(getId(user1)).to(getId(workspace2)).one()
+
+  // user1 is a member of both workspaces.
+  // user2 and user3 are members of workspace2.
+  await db.create('EDGE', 'WorkspaceMember').from(getId(user1)).to(getId(workspace1)).one()
+  await db.create('EDGE', 'WorkspaceMember').from(getId(user1)).to(getId(workspace2)).one()
+  await db.create('EDGE', 'WorkspaceMember').from(getId(user2)).to(getId(workspace2)).one()
+  await db.create('EDGE', 'WorkspaceMember').from(getId(user3)).to(getId(workspace2)).one()
 
   //
   // Select all workspaces where the owner's name is "Ace Base"
@@ -139,38 +168,17 @@ export async function run () {
     SELECT
       name,
       logo,
-      owner       AS owner_id,
-      owner.name  AS owner_name,
-      owner.email AS owner_email,
-      owner.photo AS owner_photo
+      IN('WorkspaceOwner').@rid AS ownerId,
+      IN('WorkspaceOwner').name AS ownerName,
+      IN('WorkspaceAdmin').@rid AS adminId,
+      IN('WorkspaceAdmin').name AS adminName,
+      IN('WorkspaceMember').@rid AS memberId,
+      IN('WorkspaceMember').name AS memberName
     FROM Workspace
-    WHERE owner.name = "Ace Base"
+    WHERE IN('WorkspaceAdmin').name LIKE '%Ace%'
   `)
-  console.log(
-    `Select all workspaces owned by Ace Base:\n` +
-    r.map(x => `- ${x.name} (owner: ${x.owner_name})`).join(`\n`)
-  )
-
-  // Add workspace1 and workspace2 to user1’s workspaces set.
-  // NOTE: Adding workspace2 several shouldn't have any effect since we've
-  // declared a LinkSet type on the workspaces property.
-  user1.workspaces = [workspace1['@rid'], workspace2['@rid'], workspace2['@rid'], workspace2['@rid']]
-  await db.record.update(user1)
-
-  // Add workspace2 to user2’s workspaces set.
-  user2.workspaces = [workspace2['@rid']]
-  await db.record.update(user2)
-
-  // Add user1 as admin and member of workspace1.
-  workspace1.admins = [user1['@rid']]
-  workspace1.members = [user1['@rid']]
-  await db.record.update(workspace1)
-
-  // Add user1 as admin and member of workspace2 and
-  // user2 as member.
-  workspace2.admins = [user1['@rid']]
-  workspace2.members = [user1['@rid'], user2['@rid']]
-  await db.record.update(workspace2)
+  .all()
+  console.log(`Found ${r.length} workspaces:\n`, r)
 
   //
   // Select all users where the owner's name is "Ace Base"
@@ -181,22 +189,16 @@ export async function run () {
       name,
       email,
       photo,
-      workspaces       AS workspace_id,
-      workspaces.name  AS workspace_name,
-      workspaces.logo  AS workspace_logo
+      OUT('WorkspaceMember').@rid AS workspaceId,
+      OUT('WorkspaceMember').name AS workspaceName,
+      OUT('WorkspaceMember').logo AS workspaceLogo
     FROM User
-    WHERE name IN ["Chase Case", "Ace Base"]
-    AND workspaces.name LIKE '%Startup'
+    WHERE
+      name IN ['Ace Base']
+      AND OUT('WorkspaceMember').name LIKE '%Startup%'
   `)
+  .all()
   console.log(`Found ${r.length} users:\n`, r)
-
-  // user1 = await db.record.get(user1)
-  // console.log(user1)
-
-  // console.log(r)
-
-  // const rec1 = await db.record.get('#1:1')
-  // console.log(rec1)
 
   server.close()
 }

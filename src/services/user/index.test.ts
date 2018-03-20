@@ -2,19 +2,35 @@ import * as test from 'tape'
 import * as User from './index'
 import * as Nats from '../../lib/nats-streaming'
 
+const source = 'test-user-service'
 let svc
 
 test('before tests', async t => {
   // Setup service.
-  svc = await User.setupServer({ 'client-id': 'test-user1' })
+  svc = await User.service
   t.end()
 })
 
-test('event: v1.user.create - failed due to missing field test', async t => {
+test('user-service - v1.user.create - failed due to missing field test', async t => {
   t.plan(1)
 
+  const sub = Nats.subscribeToEvents(svc.stan, {
+    source,
+    queueGroup: null,
+    eventHandlers: {
+      'v1.user.create.ok': async () => t.fail('should fail due to missing "email" field'),
+      'v1.user.create.error': async e => {
+        sub.unsubscribe()
+        t.ok(
+          e.data.error.includes('email: string expected'),
+          'should get a validation error saying email is missing'
+        )
+      }
+    },
+  })
+
   Nats.publishEvent(svc.stan, {
-    source: 'test-user-create',
+    source,
     event: 'v1.user.create',
     data: {
       name: 'Ace Base',
@@ -23,28 +39,27 @@ test('event: v1.user.create - failed due to missing field test', async t => {
     },
     credentials: null,
   })
-
-  const sub = Nats.subscribeToEvents(svc.stan, {
-    source: 'test-user-create',
-    queueGroup: null,
-    eventHandlers: {
-      'v1.user.create.ok': () => t.fail('should fail due to missing "email" field'),
-      'v1.user.create.error': e => {
-        sub.close()
-        t.ok(
-          e.data.error.includes('email: string expected'),
-          'should get a validation error saying email is missing'
-        )
-      }
-    },
-  })
 })
 
-test('event: v1.user.create - user created successfully test', async t => {
-  t.plan(1)
+test('user-service - v1.user.create - user created successfully test', async t => {
+  t.plan(3)
+
+  Nats.subscribeToEvents(svc.stan, {
+    source,
+    queueGroup: null,
+    eventHandlers: {
+      'v1.user.create.ok': async e => {
+        // console.log('e=', e)
+        t.equals(e.data.user.email, 'ace.base@example.com', 'should create a user successfully')
+        t.equals(e.data.user.password, undefined, 'should not find password prop in the message')
+        t.equals(e.data.user.salt, undefined, 'should not find salt prop in the message')
+      },
+      'v1.user.create.error': async () => t.fail('should not get a validation error'),
+    },
+  })
 
   Nats.publishEvent(svc.stan, {
-    source: 'test-user-create',
+    source,
     event: 'v1.user.create',
     data: {
       name: 'Ace Base',
@@ -52,17 +67,6 @@ test('event: v1.user.create - user created successfully test', async t => {
       password: '12345678',
     },
     credentials: null,
-  })
-
-  Nats.subscribeToEvents(svc.stan, {
-    source: 'test-user-create',
-    queueGroup: null,
-    eventHandlers: {
-      'v1.user.create.ok': e => {
-        t.equals(e.data.user.email, 'ace.base@example.com', 'should create a user successfully')
-      },
-      'v1.user.create.error': () => t.fail('should not get a validation error'),
-    },
   })
 })
 
