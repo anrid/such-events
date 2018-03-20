@@ -45,9 +45,8 @@ export async function init (app: Express, clientId: string) {
 
     // Publish event.
     Nats.publishEvent(stan, {
-      source: 'api-gateway-out',
+      source: 'api-gateway.pub',
       requestId,
-      requestCreated: null,
       event: e.event,
       data,
       credentials,
@@ -56,7 +55,7 @@ export async function init (app: Express, clientId: string) {
 
   // Setup broadcast subscriber.
   Nats.subscribeToEvents(stan, {
-    source: 'api-gateway-in',
+    source: 'api-gateway.sub',
     queueGroup: null, 
     eventHandlers: {
       'v1.broadcast': (e) => {

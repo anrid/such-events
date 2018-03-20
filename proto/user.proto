@@ -1,0 +1,16 @@
+package tw;
+syntax = "proto3";
+
+message CreateUserMessage {
+  required string name = 1;
+  required string email = 2;
+  required string password = 3;
+}
+
+message CreateUserOkMessage {
+  required UserInfo user = 1;
+  message UserInfo {
+    required string name = 1;
+    required string email = 2;
+  }
+}

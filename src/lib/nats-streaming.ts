@@ -19,20 +19,20 @@ export function getConnection (clientId: string | null): Promise<Stan.Stan> {
       reconnectTimeWait: 3000,
       encoding: 'binary',
     })
-    nc.on('close', () => L.info('NATS: action=close'))
+    nc.on('close', () => L.info(`[NATS] action=connection-closed cluster=${clusterId} client=${id}`))
 
     const clusterId = process.env.SUCH_EVENTS_NATS_CLUSTER_NAME
-    L.info(`NATS: action=connecting cluster=${clusterId} id=${id} ..`) 
+    L.info(`[NATS] action=connecting cluster=${clusterId} client=${id}`) 
     _conn = Stan.connect(clusterId, id, { nc })
 
     _conn.on('connect', () => {
-      L.info(`NATS: action=connected cluster=${clusterId} id=${id}`)
+      L.info(`[NATS] action=connected cluster=${clusterId} client=${id}`)
       resolve(_conn)
     })
 
-    _conn.on('reconnecting', () => L.info.log(`NATS: action=reconnecting cluster=${clusterId} id=${id} ..`))
-    _conn.on('reconnect', () => L.info(`NATS: action=reconnected cluster=${clusterId} id=${id}`))
-    _conn.on('error', err => L.error('NATS: error=', err))
+    _conn.on('reconnecting', () => L.info.log(`[NATS] action=reconnecting cluster=${clusterId} client=${id}`))
+    _conn.on('reconnect', () => L.info(`[NATS] action=reconnected cluster=${clusterId} client=${id}`))
+    _conn.on('error', err => L.error(`[NATS] action=connection-error cluster=${clusterId} client=${id} error=%s`, err))
 
     _conn['clientId'] = id
     _conn.close = () => nc.close()
@@ -51,25 +51,29 @@ function createId (prefix: string = '') {
   return `${prefix}${generate()}`
 }
 
-function createSubscription (
-  conn: Stan.Stan,
-  subject: string,
-  queueGroup: string | null,
-  onMessage: (msg: any) => Promise<void>,
-  isDurable: boolean,
-) {
-  // Subscribe with a durable name.
+function createSubscription (conn: Stan.Stan, a: CreateSubscriptionOptions) {
   const opts = conn.subscriptionOptions()
-  opts.setStartWithLastReceived()
-  if (isDurable) opts.setDurableName(subject)
 
-  const sub = conn.subscribe(subject, queueGroup, opts)
+  if (a.isDurable) opts.setDurableName(a.subject)
+  if (a.fromMillisAgo) opts.setStartAtTimeDelta(a.fromMillisAgo)
+  if (a.fromBeginning) opts.setDeliverAllAvailable()
 
-  sub.on('message', onMessage)
-  sub.on('ready', () => L.info(`NATS: action=subscribe status=ready subject=${subject}`))
-  sub.on('error', err => L.error('NATS: error=', err))
-  sub.on('unsubscribed', () => L.info(`NATS: action=unsubscribe subject=${subject}`))
-  sub.on('close', () => L.info(`NATS: action=subscription_closed subject=${subject}`))
+  const sub = conn.subscribe(a.subject, a.queueGroup, opts)
+
+  sub.on('message', a.onMessage)
+  sub.on('ready', () => (
+    L.info(`[NATS] action=subscription-ready source=${a.source} client=${conn['clientId']} subject=${a.subject}`)
+  ))
+  sub.on('error', err => {
+    L.error(`[NATS] action=subscription-error source=${a.source} client=${conn['clientId']} error=${err.message}`)
+    L.error('[NATS]', err)
+  })
+  sub.on('unsubscribed', () => (
+    L.info(`[NATS] action=unsubscribed source=${a.source} client=${conn['clientId']} subject=${a.subject}`)
+  ))
+  sub.on('close', () => (
+    L.info(`NATS: action=subscription-closed source=${a.source} client=${conn['clientId']} subject=${a.subject}`)
+  ))
 
   return sub
 }
@@ -107,37 +111,40 @@ export function subscribeToEvents (conn: Stan.Stan, a: SubscriberOptions) {
       msgData = msg.getData().toString()
       e = JSON.parse(msgData)
 
-      const handler = a.eventHandlers[e.event]
+      const handler = a.eventHandlers[e.event] || a.eventHandlers['*']
       if (!handler) return
 
       publisher = createPublisher(conn, a.source, e)
       await handler(e, publisher)
 
+      const took = Date.now() - timer
+      const total = e.requestCreated ? Date.now() - e.requestCreated : 0
       L.info(
-        `NATS: client=${conn['clientId']} action=sub ` +
-        `event=${e.event} request=${e.requestId} took=${Date.now() - timer} ` +
-        `total=${e.requestCreated ? Date.now() - e.requestCreated : 0}`
+        `[NATS] action=event event=${e.event} source=${e.source} seq=${msg.getSequence()} ` + 
+        `client=${conn['clientId']} request=${e.requestId} took=${took} total=${total}`
       )
     } catch (err) {
-      const event = e ? e.event : 'none'
+      const event = e ? e.event : 'unknown'
+      const source = e ? e.source : 'unknown'
       const requestOrMessage = e ? `request=${e.requestId}` : `msg=${msgData}`
       L.error(
-        `NATS: client=${conn['clientId']} action=sub ` +
-        `event=${event} ${requestOrMessage} error=${err.message}`
+        `[NATS] action=event-error event=${event} source=${source} seq=${msg.getSequence()} ` +
+        `client=${conn['clientId']} ${requestOrMessage} error=${err.message}`
       )
+      L.error('[NATS]', err)
+
       if (publisher) {
-        publisher(`${msg.getSubject()}:error`, { error: err.message })
+        publisher(`${event}.error`, { error: err.message })
       }
     }
   }
 
-  const sub = createSubscription(
-    conn,
-    EVENT_SOURCE_SUBJECT,
-    a.queueGroup,
-    handler,
-    false,
-  )
+  const sub = createSubscription(conn, {
+    source: a.source,
+    subject: EVENT_SOURCE_SUBJECT,
+    queueGroup: a.queueGroup,
+    onMessage: handler,
+  })
 
   return sub
 }
@@ -146,14 +153,19 @@ export function publishEvent (conn: Stan.Stan, e: EventMessage) {
   if (!e.requestId) e.requestId = createRequestId()
   if (!e.requestCreated) e.requestCreated = Date.now()
   const payload = JSON.stringify(e)
+  const total = e.requestCreated ? Date.now() - e.requestCreated : 0
+
   L.info(
-    `NATS: client=${conn['clientId']} action=pub event=${e.event} ` +
-    `request=${e.requestId} total=${e.requestCreated ? Date.now() - e.requestCreated : 0}`
-  )
+    `[NATS] action=publish event=${e.event} source=${e.source} ` +
+    `client=${conn['clientId']} request=${e.requestId} total=${total}`
+  )  
+
   conn.publish(EVENT_SOURCE_SUBJECT, payload, (err, _guid) => {
     if (err) {
-      L.error(`NATS: client=${conn['clientId']} error=`, err)
-      return
+      L.error(
+        `[NATS] action=publish-ack-timeout-error event=${e.event} source=${e.source} ` + 
+        `client=${conn['clientId']} data=%j error=%s`, e.data, err
+      )
     }
   })
 }
@@ -161,7 +173,12 @@ export function publishEvent (conn: Stan.Stan, e: EventMessage) {
 async function testRecv (clientId: string) {
   const conn = await getConnection(clientId)
   const onMessage = async msg => console.log('Received a message from event source: ' + msg.getData())
-  createSubscription(conn, EVENT_SOURCE_SUBJECT, null, onMessage, true)
+  createSubscription(conn, {
+    source: 'test-receive-message',
+    subject: EVENT_SOURCE_SUBJECT,
+    queueGroup: null,
+    onMessage,
+  })
 }
 
 async function testSend (clientId: string) {
@@ -186,8 +203,18 @@ if (require.main === module) {
 export type Publisher = (event: string, data: any) => void
 export type EventMessageHandler = (event: EventMessage, publisher: Publisher) => void
 
+export interface CreateSubscriptionOptions {
+  source: string,               // Where this subscriber is located.  
+  subject: string,
+  queueGroup: string | null,
+  onMessage: (msg: any) => Promise<void>,
+  isDurable?: boolean,          // Create a durable subscription. 
+  fromMillisAgo?: number,       // Start processing messages since the given timestamp (millis).
+  fromBeginning?: boolean,      // Start processing messages from the beginning of the queue.
+}
+
 export interface SubscriberOptions {
-  source: string,
+  source: string,               // Where this subscriber is located.
   queueGroup: string | null,
   eventHandlers: {
     [event: string]: EventMessageHandler,
@@ -195,10 +222,10 @@ export interface SubscriberOptions {
 }
 
 export interface EventMessage {
-  source: string,                 // Source that published this event.
-  requestId: string | null,       // Pass request id of the original request if we wish
+  source: string,                 // Where this event was published.
+  requestId?: string | null,      // Pass request id of the original request if we wish
                                   // to have it propagate.
-  requestCreated: number | null,  // Pass created timestamp (millis) of the original request.
+  requestCreated?: number | null, // Pass created timestamp (millis) of the original request.
   event: string,                  // Event name.
   data: any,                      // Data object.
   credentials: any | null,        // Caller's credentials.

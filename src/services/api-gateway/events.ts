@@ -16,6 +16,12 @@ export const EVENTS: RequestToEventMap = {
       event: 'v1.echo-secret.create',
     }
   },
+  '/api/v1/slow': {
+    'POST': {
+      event: 'v1.slow',
+      credentials: false,
+    }
+  },
 }
 
 interface RequestToEventMap {

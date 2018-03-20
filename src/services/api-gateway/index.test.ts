@@ -56,11 +56,11 @@ test('GET /api/v1/unimplemented', async t => {
   t.equals(res.statusCode, Boom.badRequest().output.statusCode, 'should get bad request error')
 })
 
-test('POST /api/v1/signup - timeout', async t => {
+test('POST /api/v1/slow - timeout', async t => {
   t.plan(2)
   
   const res = await request(server.app)
-  .post('/api/v1/signup')
+  .post('/api/v1/slow')
   .accept('json')
   .send({ email: 'ace@base.se', password: '12345678' })
 
