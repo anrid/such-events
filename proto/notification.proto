@@ -10,4 +10,5 @@ message Notification {
   required string from = 2;
   required string to = 3;
   string message = 4;
+  string metadata = 5;
 }

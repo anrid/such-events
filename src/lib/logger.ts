@@ -4,7 +4,7 @@ export const L = new Winston.Logger({
   transports: [
     new Winston.transports.File({
       level:            'info',
-      filename:         '/tmp/tw-search.log',
+      filename:         '/tmp/such-events.log',
       handleExceptions: true,
       json:             true,
       maxsize:          5242880, // 5MB
