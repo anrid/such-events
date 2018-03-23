@@ -1,4 +1,5 @@
 import * as Assert from 'assert'
+import { L } from './logger'
 import {
   ReadPreference,
   MongoClient,
@@ -37,14 +38,14 @@ function getDbName (url) {
 }
 
 export async function connect (url: string, dbName: string, options: any = { }) {
-  console.log('Connecting to:', url)
+  L.info(`[MONGO] action=connecting url=${url}`)
   const o = Object.assign({ }, options, {
     readPreference: ReadPreference.SECONDARY_PREFERRED,
     compression: 'zlib',
   })
   const client: any = await MongoClient.connect(url, o)
   const db = client.db(dbName)
-  console.log('Connected to database:', db.databaseName)
+  L.info(`[MONGO] action=connected database=${db.databaseName}`)
   return {
     client,
     db,

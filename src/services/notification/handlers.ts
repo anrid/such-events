@@ -1,25 +1,21 @@
 import { generate } from 'shortid'
 import * as P from '../../lib/proto'
+import * as T from '../../../proto/compiled'
 
 const NOTIFICATIONS = []
 
-const notificationType = P.load('notification.proto')
-const userType = P.load('user.proto')
-
 export async function userCreatedOkHandler (e, publisher) {
-  P.validate(userType, 'tw.CreateUserOk', e.data)
+  const m = P.create(T.v1.UserCreateOk, e.data)
 
-  const user = e.data.user
   const notification = {
     id: generate(),
-    from: user.id,
+    from: m.user.id,
     to: 'system',
     message: 'User created successfully',
-    metadata: JSON.stringify({ user }),
+    metadata: JSON.stringify({ user: m.user }),
   }
   NOTIFICATIONS.push(notification)
   
-  const out = P.create(notificationType, 'tw.CreateNotificationOk', { notification })
-
+  const out = P.create(T.v1.NotificationCreateOk, { notification })
   publisher('v1.notification.create.ok', out)
 }

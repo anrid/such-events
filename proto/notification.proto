@@ -1,7 +1,7 @@
-package tw;
+package v1;
 syntax = "proto3";
 
-message CreateNotificationOk {
+message NotificationCreateOk {
   required Notification notification = 1;
 }
 

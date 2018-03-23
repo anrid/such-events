@@ -42,7 +42,7 @@ test('user-service - v1.user.create - failed due to missing field test', async t
 })
 
 test('user-service - v1.user.create - user created successfully test', async t => {
-  t.plan(6)
+  t.plan(7)
 
   Nats.subscribeToEvents(svc.stan, {
     source,
@@ -51,8 +51,9 @@ test('user-service - v1.user.create - user created successfully test', async t =
       'v1.user.create.ok': async e => {
         // console.log('e=', e)
         t.equals(e.data.user.email, 'ace.base@example.com', 'should create a user successfully')
-        t.equals(e.data.user.password, undefined, 'should not find password prop in the message')
-        t.equals(e.data.user.salt, undefined, 'should not find salt prop in the message')
+        t.equals(e.data.user.password, undefined, 'should not find a "password" prop in the message')
+        t.equals(e.data.user.salt, undefined, 'should not find a "salt" prop in the message')
+        t.equals(e.data.token, undefined, 'should not find a "token" prop in the message')
       },
       'v1.broadcast': async e => {
         t.equals(e.data.type, 'v1.user.create.ok', 'should get a broadcast of type "v1.user.create.ok"')

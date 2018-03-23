@@ -119,7 +119,7 @@ function createSubscription (conn: Stan.Stan, a: CreateSubscriptionOptions) {
     L.info(`[NATS] action=unsubscribed source=${a.source} client=${clientId} subject=${a.subject}`)
   ))
   sub.on('close', () => (
-    L.info(`NATS: action=subscription-closed source=${a.source} client=${clientId} subject=${a.subject}`)
+    L.info(`[NATS] action=subscription-closed source=${a.source} client=${clientId} subject=${a.subject}`)
   ))
 
   return sub
@@ -153,7 +153,10 @@ function createPublisher (conn: Stan.Stan, source: string, parentEvent: EventMes
         break
       } catch (err) {
         if (err.message !== 'publish ack timeout') break
-        L.info(`action=retry-publish-event event=${event} source=${source} request=${requestId} delay=${retryDelay}`)
+        L.info(
+          `[NATS] action=retry-publish-event event=${event} source=${source} ` +
+          `request=${requestId} delay=${retryDelay}`
+        )
         await new Promise(r => setTimeout(r, 5000))
       }
     }

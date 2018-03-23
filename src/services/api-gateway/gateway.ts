@@ -4,8 +4,7 @@ import { EVENTS } from './events'
 import * as Boom from 'boom'
 import { L } from '../../lib/logger'
 import * as P from '../../lib/proto'
-const broadcastType = P.load('broadcast.proto')
-
+import * as T from '../../../proto/compiled'
 
 export async function init (app: Express, clientId: string) {
   // NATS streaming server connection.
@@ -63,19 +62,16 @@ export async function init (app: Express, clientId: string) {
     queueGroup: null, 
     eventHandlers: {
       'v1.broadcast': async e => {
-        P.validate(broadcastType, 'tw.BroadcastMessage', e.data)
         try {
-          const payload = JSON.parse(e.data.payload)
-          if (e.data.targets && e.data.targets.length) {
+          const m = P.create(T.v1.Broadcast, e.data)
+          const payload = JSON.parse(m.payload)
+          if (m.targets && m.targets.length) {
             // Broadcast to given targets (user ids).
-            L.info('Broadcasting to targets:', e.data.targets)
+            L.info('Broadcasting to targets:', m.targets)
           }
           else if (waiting[e.requestId]) {
             // Reply to sender.
-            waiting[e.requestId]({
-              type: e.data.type,
-              payload,
-            })
+            waiting[e.requestId]({ type: m.type, payload })
           }
         } catch (err) {
           L.error('Bad broadcast message:', e)
