@@ -25,14 +25,15 @@ test('GET / test', async t => {
 })
 
 test('POST /api/v1/echo', async t => {
-  t.plan(2)
+  t.plan(3)
   
   const res = await request(server.app)
   .post('/api/v1/echo')
   .accept('json')
   .send({ ok: 1 })
 
-  t.equals(res.body.payload.ok, 1, 'should get a JSON response with ok = 1')
+  t.equals(res.body.type, 'v1.echo.ok', 'should get body.type = "v1.echo.ok"')
+  t.equals(res.body.payload.ok, 1, 'should get body.payload.ok = 1')
   t.equals(res.statusCode, 200, 'should get 200 OK')
 })
 

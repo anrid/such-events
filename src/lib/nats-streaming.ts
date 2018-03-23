@@ -98,12 +98,19 @@ function createSubscription (conn: Stan.Stan, a: CreateSubscriptionOptions) {
     .then(() => msg.ack())
     .catch(() => msg.ack())
   })
-  sub.on('ready', () => (
-    L.info(
-      `[NATS] action=subscription-ready source=${a.source} client=${clientId} subject=${a.subject} ` +
-      optsLog.join(' ')
-    )
-  ))
+
+  // Wrap ready event in a promise.
+  // Users of the subscription are then able to just do `await sub.isReady`
+  sub['isReady'] = new Promise(resolve => {
+    sub.on('ready', () => {
+      L.info(
+        `[NATS] action=subscription-ready source=${a.source} client=${clientId} subject=${a.subject} ` +
+        optsLog.join(' ')
+      )
+      resolve()
+    })
+  })
+
   sub.on('error', err => {
     L.error(`[NATS] action=subscription-error source=${a.source} client=${clientId} error=${err.message}`)
     L.error('[NATS]', err)
@@ -119,7 +126,7 @@ function createSubscription (conn: Stan.Stan, a: CreateSubscriptionOptions) {
 }
 
 function createPublisher (conn: Stan.Stan, source: string, parentEvent: EventMessage | null): Publisher {
-  return (event: string, data: any) => {
+  return async (event: string, data: any) => {
     let requestId = null
     let requestCreated = null
     let credentials = null
@@ -130,14 +137,26 @@ function createPublisher (conn: Stan.Stan, source: string, parentEvent: EventMes
       credentials = parentEvent.credentials
     }
 
-    publishEvent(conn, {
-      source,
-      requestId,
-      requestCreated,
-      credentials,
-      event,
-      data
-    })
+    // Retry publishing event X number of times.
+    let retries = 10
+    let retryDelay = 5000
+    while (retries--) {
+      try {
+        await publishEvent(conn, {
+          source,
+          requestId,
+          requestCreated,
+          credentials,
+          event,
+          data
+        })
+        break
+      } catch (err) {
+        if (err.message !== 'publish ack timeout') break
+        L.info(`action=retry-publish-event event=${event} source=${source} request=${requestId} delay=${retryDelay}`)
+        await new Promise(r => setTimeout(r, 5000))
+      }
+    }
   }
 }
 
@@ -201,7 +220,7 @@ export function subscribeToEvents (conn: Stan.Stan, a: SubscriberOptions) {
   return sub
 }
 
-export function publishEvent (conn: Stan.Stan, e: EventMessage) {
+export async function publishEvent (conn: Stan.Stan, e: EventMessage) {
   if (!e.requestId) e.requestId = createRequestId()
   if (!e.requestCreated) e.requestCreated = Date.now()
 
@@ -213,18 +232,21 @@ export function publishEvent (conn: Stan.Stan, e: EventMessage) {
     `client=${conn['clientId']} request=${e.requestId} total=${total}`
   )  
 
-  conn.publish(EVENT_SOURCE_SUBJECT, payload, (err, _guid) => {
-    if (err) {
-      L.error(
-        `[NATS] action=publish-ack-timeout-error event=${e.event} source=${e.source} ` + 
-        `client=${conn['clientId']} request=${e.requestId} data=%j error=%s`, e.data, err
-      )
-    } else {
+  return new Promise((resolve, reject) => {
+    conn.publish(EVENT_SOURCE_SUBJECT, payload, (err, _guid) => {
+      if (err) {
+        L.error(
+          `[NATS] action=publish-ack-timeout-error event=${e.event} source=${e.source} ` + 
+          `client=${conn['clientId']} request=${e.requestId} data=%j error=%s`, e.data, err
+        )
+        return reject(new Error('publish ack timeout'))
+      }
       L.info(
         `[NATS] action=publish-ack event=${e.event} source=${e.source} ` +
         `client=${conn['clientId']} request=${e.requestId} total=${total}`
-      )  
-    }
+      )
+      resolve()
+    })
   })
 }
 

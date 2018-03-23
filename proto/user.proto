@@ -8,10 +8,12 @@ message CreateUser {
 }
 
 message CreateUserOk {
-  required UserInfo user = 1;
-  
-  message UserInfo {
-    required string name = 1;
-    required string email = 2;
-  }
+  required User user = 1;
+  string token = 2;
+}
+
+message User {
+  required string id = 1;
+  required string name = 2;
+  required string email = 3;
 }

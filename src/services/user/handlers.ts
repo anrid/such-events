@@ -2,8 +2,10 @@ import { generate } from 'shortid'
 import { L } from '../../lib/logger'
 import * as Crypto from 'crypto'
 import * as P from '../../lib/proto'
+import * as Jwt from '../../lib/jwt'
 
 const USERS = []
+const broadcastType = P.load('broadcast.proto')
 const userType = P.load('user.proto')
 
 export async function userCreateHandler (e, publisher) {
@@ -24,14 +26,21 @@ export async function userCreateHandler (e, publisher) {
     salt,
     password,
   }
-  
   USERS.push(user)
-  L.info('Ooo.. a new user:', user)
+  L.info(`action=user-create id=${user.id} email=${user.email}`)
 
-  // Always create outbound events via the protobufjs helper.
-  const out = P.create(userType, 'tw.CreateUserOk', { user })
+  // Create a token on fly.
+  const token = Jwt.createAccessToken(user.id, user.email)
 
-  publisher('v1.user.create.ok', out)
+  // NOTE: Always create outbound events via the protobufjs helper !
+  const out1 = P.create(userType, 'tw.CreateUserOk', { user, token })
+  publisher('v1.user.create.ok', out1)
+
+  const out2 = P.create(broadcastType, 'tw.BroadcastMessage', {
+    type: 'v1.user.create.ok',
+    payload: JSON.stringify(out1),
+  })
+  publisher('v1.broadcast', out2)
 }
 
 export async function userUpdateHandler (e, publisher) {

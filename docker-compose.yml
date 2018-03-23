@@ -26,18 +26,14 @@ services:
       - "8222:8222"
     entrypoint:
       - /nats-streaming-server
-      - --cluster_id
-      - awesome-cluster
-      - --store
-      - FILE
-      - --dir
-      - /data/nats
-      - --hb_interval
-      - '30s'
-      - --debug=false
+      - --http_port=8222
+      - --cluster_id=awesome-cluster
+      - --store=FILE
+      - --dir=/data/nats
+      - --hb_interval=30s
+      - --stan_debug=true
       - --file_compact_enabled=true
-      - --file_compact_min_size
-      - '100mb'
+      - --file_compact_min_size=100mb
     volumes:
       - nats-data:/data/nats
     networks:

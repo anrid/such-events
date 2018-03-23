@@ -13,13 +13,13 @@ export const service = runService({
 
 async function echoHandler (e, publisher) {
   const payload = JSON.stringify(e.data)
-  const out = P.create(broadcastType, 'tw.BroadcastMessage', { type: 'v1.echo', payload })
+  const out = P.create(broadcastType, 'tw.BroadcastMessage', { type: 'v1.echo.ok', payload })
   publisher('v1.broadcast', out)
 }
 
 async function echoSecretHandler (e, publisher) {
   if (!e.credentials) throw new Error('Missing credentials')
   const payload = JSON.stringify(Object.assign({ }, e.data, { email: e.credentials.email }))
-  const out = P.create(broadcastType, 'tw.BroadcastMessage', { type: 'v1.echo-secret', payload })
+  const out = P.create(broadcastType, 'tw.BroadcastMessage', { type: 'v1.echo-secret.ok', payload })
   publisher('v1.broadcast', out)
 }
