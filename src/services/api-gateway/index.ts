@@ -25,14 +25,6 @@ export async function setupServer (opts: ServerOptions) {
   // Setup express.
   const app = Express()
 
-  // Setup middleware.
-  // Parse JSON etc.
-  const bodyParser = require('body-parser')
-  // Parse application/x-www-form-urlencoded
-  app.use(bodyParser.urlencoded({ extended: false }))
-  // Parse application/json
-  app.use(bodyParser.json())
-
   // Enable compression for all requests.
   const compression = require('compression')
   app.use(compression())
@@ -40,6 +32,14 @@ export async function setupServer (opts: ServerOptions) {
   // Enable CORS for all requests.
   const cors = require('cors')
   app.use(cors())
+  
+  // Setup middleware.
+  // Parse JSON etc.
+  const bodyParser = require('body-parser')
+  // Parse application/x-www-form-urlencoded
+  app.use(bodyParser.urlencoded({ extended: false }))
+  // Parse application/json
+  app.use(bodyParser.json())
 
   // Enable JWT session handling.
   app.use(jwtMiddleware)

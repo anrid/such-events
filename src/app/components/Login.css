@@ -1,0 +1,44 @@
+.root {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-image: url(https://c1.staticflickr.com/5/4794/40117268484_4f13d58256_h.jpg);
+  background-position: center center;
+  background-size: cover;
+}
+
+.inner {
+  position: relative;
+  top: -5rem;
+  border: 1px solid gainsboro;
+  padding: 3rem;
+  border-radius: 1rem;
+  width: 20rem;
+  background-color: rgba(213, 216, 215, 0.5);
+}
+
+.inner input {
+  border: 1px solid gainsboro;
+  height: 3rem;
+  padding: 0 0.5rem;
+  border-radius: 3px;
+  width: 100%;
+}
+
+.inner div {
+  margin-top: 0.5rem;
+}
+
+.button {
+  border: 0;
+  color: white;
+  background-color: cornflowerblue;
+  font-size: 1rem;
+  height: 3rem;
+  padding: 0 1rem;
+  cursor: pointer;
+  border-radius: 3px;
+  width: 100%;
+}
