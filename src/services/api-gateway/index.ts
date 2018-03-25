@@ -7,13 +7,11 @@ import { defaultExpressErrorHandler } from '../../lib/express-utils'
 import { jwtMiddleware } from '../../lib/jwt'
 import * as Gateway from './gateway'
 import { L } from '../../lib/logger'
+import * as Moment from 'moment'
 
 Assert(process.env.SUCH_EVENTS_HOST, 'Missing env SUCH_EVENTS_HOST')
 Assert(process.env.SUCH_EVENTS_TLS_CERT, 'Missing env SUCH_EVENTS_TLS_CERT')
 Assert(process.env.SUCH_EVENTS_TLS_PRIVKEY, 'Missing env SUCH_EVENTS_TLS_PRIVKEY')
-
-// All API Gateways are expected to receive all tw-broadcast events.
-// const QUEUE_GROUP = null
 
 process.on('unhandledRejection', reason => {
   console.error('Unhandled rejection at:', reason)
@@ -45,12 +43,10 @@ export async function setupServer (opts: ServerOptions) {
   app.use(jwtMiddleware)
 
   // Setup a basic root route.
-  app.get('/', (_req, res) => {
-    res.send('API Gateway.')
-  })
+  app.get('/', (_req, res) => res.send(`API gateway running: ${Moment().format()}`))
 
   // Setup other routes.
-  const gateway = await Gateway.init(app, opts['client-id'])
+  const gateway = await Gateway.init(app, opts.id)
 
   // Setup generic error handler.
   app.use(defaultExpressErrorHandler)
@@ -62,14 +58,16 @@ export async function setupServer (opts: ServerOptions) {
   }
 
   const server = Https.createServer(options, app)
+  let isConnected = Promise.resolve()
 
   if (opts.port) {
-    server.listen(opts.port, () => {
-      L.info(
-        'API gateway listening on https://%s:%s ..',
-        process.env.SUCH_EVENTS_HOST,
-        opts.port,
-      )
+    // server.isReady is a promise that resolves when the server
+    // is listening on the given port.
+    isConnected = new Promise(resolve => {
+      server.listen(opts.port, () => {
+        L.info(`client=${opts.id} action=server-listening url=https://${process.env.SUCH_EVENTS_HOST}:${opts.port}`)
+        resolve()
+      })
     })
   }
 
@@ -84,6 +82,9 @@ export async function setupServer (opts: ServerOptions) {
   return {
     app,
     server,
+    gateway,
+    // Resolves when we're both connected and the NATS subscription is ready.
+    isReady: Promise.all([isConnected, gateway.isReady]),
     close: () => {
       // Close everything !
       server.close()

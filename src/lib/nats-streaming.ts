@@ -16,6 +16,7 @@ export function getConnection (clientId: string | null): Promise<Stan.Stan> {
       reconnect: true,
       maxReconnectAttempts: 100,
       reconnectTimeWait: 3000,
+      waitOnFirstConnect: true,
       encoding: 'binary',
     })
 
@@ -91,6 +92,10 @@ function createSubscription (conn: Stan.Stan, a: CreateSubscriptionOptions) {
   // Wait no longer than 15 seconds for a message to be acked.
   opts.setAckWait(15 * 1000)
 
+  L.info(
+    `[NATS] action=subscribe-to source=${a.source} client=${clientId} subject=${a.subject} ` +
+    optsLog.join(' ')
+  )
   const sub = conn.subscribe(a.subject, a.queueGroup || null, opts)
   
   sub.on('message', (msg: Stan.Message) => {
