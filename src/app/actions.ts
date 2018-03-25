@@ -3,18 +3,27 @@ import { history } from './history'
 export const INC_COUNTER = 'INC_COUNTER'
 export const SET_SESSION = 'SET_SESSION'
 
-export const inc = () => ({ type: INC_COUNTER, payload: { } })
+const SESSION_KEY = 'such-events-session'
 
-export const login = (email, password) => 
+export const inc = () => ({ type: INC_COUNTER, payload: { } })
+export const setSession = session => ({ type: SET_SESSION, payload: session })
+
+export const login = (email, _password) => 
   async (dispatch, getState) => {
-    console.log('LOGIN ACTION!')
-    dispatch({
-      type: SET_SESSION,
-      payload: {
-        user: { id: 1, email, name: 'Joe' },
-        token: 'test',
-      }
-    })
+    const session = { user: { id: 1, email, name: 'Joe' }, token: 'test' }
+    
+    dispatch(setSession(session))
     console.log('STATE:', getState())
+    
+    setSessionLocalStorage(session)  
+    
     history.push('/')
   }
+
+export const setSessionLocalStorage = session => 
+  window.localStorage.setItem(SESSION_KEY, JSON.stringify(session))
+
+export const getSessionLocalStorage = () => {
+  const s = window.localStorage.getItem(SESSION_KEY)
+  return s ? JSON.parse(s) : null
+}
