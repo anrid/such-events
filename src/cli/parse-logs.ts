@@ -13,21 +13,13 @@ const interval = setInterval(processRequests, 2000)
 
 rl.on('line', line => {
   const d = JSON.parse(line)
-
-  if (d.message && d.message.includes('=')) {
-    const pairs: any = { }    
-    d.message.split(/\s+/).forEach(pair => {
-      const [key, value] = pair.split('=')
-      pairs[key] = value
-    })
-
-    // Extract requests.
-    if (pairs.request && pairs.action === 'event') {
-      if (!requests[pairs.request]) requests[pairs.request] = []
-      requests[pairs.request].push({
-        event: pairs.event,
-        took: parseInt(pairs.took, 10) / 1000,
-        total: pairs.total,
+  if (d.message === 'event handled' || d.message === 'handle event error') {
+    if (d.request) {
+      if (!requests[d.request]) requests[d.request] = []
+      requests[d.request].push({
+        event: d.event,
+        took: d.took || 0,
+        total: d.total || 0,
         date: d.timestamp,
       })
     }
@@ -48,7 +40,7 @@ function processRequests () {
       requests[id].forEach((e, i) => {
         console.log(
           `${first ? `\n` + pad(e.date) : pad(' ')} ${i + 1}. ${pad('  '.repeat(i) + e.event)} ` +
-          `${pad(`took: ${e.took} sec`, 15)} / ${pad(`${e.total} sec`)}`
+          `${pad(`took: ${e.took}`, 5)} / ${pad(`${e.total} ms`)}`
         )
         first = false
       })

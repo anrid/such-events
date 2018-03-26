@@ -67,15 +67,16 @@ export async function init (app: Express, clientId: string) {
           const m = P.create(T.v1.Broadcast, e.data)
           const payload = JSON.parse(m.payload)
           if (m.targets && m.targets.length) {
-            // Broadcast to given targets (user ids).
-            L.info('Broadcasting to targets:', m.targets)
+            // Broadcast to targets, i.e. a list of user ids.
+            L.info({ message: 'broadcast', targets: m.targets, type: m.type })
           }
           else if (waiting[e.requestId]) {
             // Reply to sender.
+            L.info({ message: 'reply', request: e.requestId, type: m.type })
             waiting[e.requestId]({ type: m.type, payload })
           }
         } catch (err) {
-          L.error('Bad broadcast message:', e)
+          L.error({ message: 'bad broadcast', event: e })
           L.error(err)
         }
       },

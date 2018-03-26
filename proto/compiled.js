@@ -740,25 +740,25 @@
             return UserCreateOk;
         })();
     
-        v1.UserCreateResponse = (function() {
+        v1.UserLogin = (function() {
     
             /**
-             * Properties of a UserCreateResponse.
+             * Properties of a UserLogin.
              * @memberof v1
-             * @interface IUserCreateResponse
-             * @property {v1.IUser} user UserCreateResponse user
-             * @property {string} token UserCreateResponse token
+             * @interface IUserLogin
+             * @property {string} email UserLogin email
+             * @property {string} password UserLogin password
              */
     
             /**
-             * Constructs a new UserCreateResponse.
+             * Constructs a new UserLogin.
              * @memberof v1
-             * @classdesc Represents a UserCreateResponse.
-             * @implements IUserCreateResponse
+             * @classdesc Represents a UserLogin.
+             * @implements IUserLogin
              * @constructor
-             * @param {v1.IUserCreateResponse=} [properties] Properties to set
+             * @param {v1.IUserLogin=} [properties] Properties to set
              */
-            function UserCreateResponse(properties) {
+            function UserLogin(properties) {
                 if (properties)
                     for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                         if (properties[keys[i]] != null)
@@ -766,42 +766,287 @@
             }
     
             /**
-             * UserCreateResponse user.
-             * @member {v1.IUser} user
-             * @memberof v1.UserCreateResponse
+             * UserLogin email.
+             * @member {string} email
+             * @memberof v1.UserLogin
              * @instance
              */
-            UserCreateResponse.prototype.user = null;
+            UserLogin.prototype.email = "";
     
             /**
-             * UserCreateResponse token.
-             * @member {string} token
-             * @memberof v1.UserCreateResponse
+             * UserLogin password.
+             * @member {string} password
+             * @memberof v1.UserLogin
              * @instance
              */
-            UserCreateResponse.prototype.token = "";
+            UserLogin.prototype.password = "";
     
             /**
-             * Creates a new UserCreateResponse instance using the specified properties.
+             * Creates a new UserLogin instance using the specified properties.
              * @function create
-             * @memberof v1.UserCreateResponse
+             * @memberof v1.UserLogin
              * @static
-             * @param {v1.IUserCreateResponse=} [properties] Properties to set
-             * @returns {v1.UserCreateResponse} UserCreateResponse instance
+             * @param {v1.IUserLogin=} [properties] Properties to set
+             * @returns {v1.UserLogin} UserLogin instance
              */
-            UserCreateResponse.create = function create(properties) {
-                return new UserCreateResponse(properties);
+            UserLogin.create = function create(properties) {
+                return new UserLogin(properties);
             };
     
             /**
-             * Verifies a UserCreateResponse message.
+             * Verifies a UserLogin message.
              * @function verify
-             * @memberof v1.UserCreateResponse
+             * @memberof v1.UserLogin
              * @static
              * @param {Object.<string,*>} message Plain object to verify
              * @returns {string|null} `null` if valid, otherwise the reason why it is not
              */
-            UserCreateResponse.verify = function verify(message) {
+            UserLogin.verify = function verify(message) {
+                if (typeof message !== "object" || message === null)
+                    return "object expected";
+                if (!$util.isString(message.email))
+                    return "email: string expected";
+                if (!$util.isString(message.password))
+                    return "password: string expected";
+                return null;
+            };
+    
+            /**
+             * Creates a UserLogin message from a plain object. Also converts values to their respective internal types.
+             * @function fromObject
+             * @memberof v1.UserLogin
+             * @static
+             * @param {Object.<string,*>} object Plain object
+             * @returns {v1.UserLogin} UserLogin
+             */
+            UserLogin.fromObject = function fromObject(object) {
+                if (object instanceof $root.v1.UserLogin)
+                    return object;
+                var message = new $root.v1.UserLogin();
+                if (object.email != null)
+                    message.email = String(object.email);
+                if (object.password != null)
+                    message.password = String(object.password);
+                return message;
+            };
+    
+            /**
+             * Creates a plain object from a UserLogin message. Also converts values to other types if specified.
+             * @function toObject
+             * @memberof v1.UserLogin
+             * @static
+             * @param {v1.UserLogin} message UserLogin
+             * @param {$protobuf.IConversionOptions} [options] Conversion options
+             * @returns {Object.<string,*>} Plain object
+             */
+            UserLogin.toObject = function toObject(message, options) {
+                if (!options)
+                    options = {};
+                var object = {};
+                if (options.defaults) {
+                    object.email = "";
+                    object.password = "";
+                }
+                if (message.email != null && message.hasOwnProperty("email"))
+                    object.email = message.email;
+                if (message.password != null && message.hasOwnProperty("password"))
+                    object.password = message.password;
+                return object;
+            };
+    
+            /**
+             * Converts this UserLogin to JSON.
+             * @function toJSON
+             * @memberof v1.UserLogin
+             * @instance
+             * @returns {Object.<string,*>} JSON object
+             */
+            UserLogin.prototype.toJSON = function toJSON() {
+                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+            };
+    
+            return UserLogin;
+        })();
+    
+        v1.UserLoginOk = (function() {
+    
+            /**
+             * Properties of a UserLoginOk.
+             * @memberof v1
+             * @interface IUserLoginOk
+             * @property {v1.IUser} user UserLoginOk user
+             */
+    
+            /**
+             * Constructs a new UserLoginOk.
+             * @memberof v1
+             * @classdesc Represents a UserLoginOk.
+             * @implements IUserLoginOk
+             * @constructor
+             * @param {v1.IUserLoginOk=} [properties] Properties to set
+             */
+            function UserLoginOk(properties) {
+                if (properties)
+                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                        if (properties[keys[i]] != null)
+                            this[keys[i]] = properties[keys[i]];
+            }
+    
+            /**
+             * UserLoginOk user.
+             * @member {v1.IUser} user
+             * @memberof v1.UserLoginOk
+             * @instance
+             */
+            UserLoginOk.prototype.user = null;
+    
+            /**
+             * Creates a new UserLoginOk instance using the specified properties.
+             * @function create
+             * @memberof v1.UserLoginOk
+             * @static
+             * @param {v1.IUserLoginOk=} [properties] Properties to set
+             * @returns {v1.UserLoginOk} UserLoginOk instance
+             */
+            UserLoginOk.create = function create(properties) {
+                return new UserLoginOk(properties);
+            };
+    
+            /**
+             * Verifies a UserLoginOk message.
+             * @function verify
+             * @memberof v1.UserLoginOk
+             * @static
+             * @param {Object.<string,*>} message Plain object to verify
+             * @returns {string|null} `null` if valid, otherwise the reason why it is not
+             */
+            UserLoginOk.verify = function verify(message) {
+                if (typeof message !== "object" || message === null)
+                    return "object expected";
+                {
+                    var error = $root.v1.User.verify(message.user);
+                    if (error)
+                        return "user." + error;
+                }
+                return null;
+            };
+    
+            /**
+             * Creates a UserLoginOk message from a plain object. Also converts values to their respective internal types.
+             * @function fromObject
+             * @memberof v1.UserLoginOk
+             * @static
+             * @param {Object.<string,*>} object Plain object
+             * @returns {v1.UserLoginOk} UserLoginOk
+             */
+            UserLoginOk.fromObject = function fromObject(object) {
+                if (object instanceof $root.v1.UserLoginOk)
+                    return object;
+                var message = new $root.v1.UserLoginOk();
+                if (object.user != null) {
+                    if (typeof object.user !== "object")
+                        throw TypeError(".v1.UserLoginOk.user: object expected");
+                    message.user = $root.v1.User.fromObject(object.user);
+                }
+                return message;
+            };
+    
+            /**
+             * Creates a plain object from a UserLoginOk message. Also converts values to other types if specified.
+             * @function toObject
+             * @memberof v1.UserLoginOk
+             * @static
+             * @param {v1.UserLoginOk} message UserLoginOk
+             * @param {$protobuf.IConversionOptions} [options] Conversion options
+             * @returns {Object.<string,*>} Plain object
+             */
+            UserLoginOk.toObject = function toObject(message, options) {
+                if (!options)
+                    options = {};
+                var object = {};
+                if (options.defaults)
+                    object.user = null;
+                if (message.user != null && message.hasOwnProperty("user"))
+                    object.user = $root.v1.User.toObject(message.user, options);
+                return object;
+            };
+    
+            /**
+             * Converts this UserLoginOk to JSON.
+             * @function toJSON
+             * @memberof v1.UserLoginOk
+             * @instance
+             * @returns {Object.<string,*>} JSON object
+             */
+            UserLoginOk.prototype.toJSON = function toJSON() {
+                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+            };
+    
+            return UserLoginOk;
+        })();
+    
+        v1.UserCreatedOrLoggedInReply = (function() {
+    
+            /**
+             * Properties of a UserCreatedOrLoggedInReply.
+             * @memberof v1
+             * @interface IUserCreatedOrLoggedInReply
+             * @property {v1.IUser} user UserCreatedOrLoggedInReply user
+             * @property {string} token UserCreatedOrLoggedInReply token
+             */
+    
+            /**
+             * Constructs a new UserCreatedOrLoggedInReply.
+             * @memberof v1
+             * @classdesc Represents a UserCreatedOrLoggedInReply.
+             * @implements IUserCreatedOrLoggedInReply
+             * @constructor
+             * @param {v1.IUserCreatedOrLoggedInReply=} [properties] Properties to set
+             */
+            function UserCreatedOrLoggedInReply(properties) {
+                if (properties)
+                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                        if (properties[keys[i]] != null)
+                            this[keys[i]] = properties[keys[i]];
+            }
+    
+            /**
+             * UserCreatedOrLoggedInReply user.
+             * @member {v1.IUser} user
+             * @memberof v1.UserCreatedOrLoggedInReply
+             * @instance
+             */
+            UserCreatedOrLoggedInReply.prototype.user = null;
+    
+            /**
+             * UserCreatedOrLoggedInReply token.
+             * @member {string} token
+             * @memberof v1.UserCreatedOrLoggedInReply
+             * @instance
+             */
+            UserCreatedOrLoggedInReply.prototype.token = "";
+    
+            /**
+             * Creates a new UserCreatedOrLoggedInReply instance using the specified properties.
+             * @function create
+             * @memberof v1.UserCreatedOrLoggedInReply
+             * @static
+             * @param {v1.IUserCreatedOrLoggedInReply=} [properties] Properties to set
+             * @returns {v1.UserCreatedOrLoggedInReply} UserCreatedOrLoggedInReply instance
+             */
+            UserCreatedOrLoggedInReply.create = function create(properties) {
+                return new UserCreatedOrLoggedInReply(properties);
+            };
+    
+            /**
+             * Verifies a UserCreatedOrLoggedInReply message.
+             * @function verify
+             * @memberof v1.UserCreatedOrLoggedInReply
+             * @static
+             * @param {Object.<string,*>} message Plain object to verify
+             * @returns {string|null} `null` if valid, otherwise the reason why it is not
+             */
+            UserCreatedOrLoggedInReply.verify = function verify(message) {
                 if (typeof message !== "object" || message === null)
                     return "object expected";
                 {
@@ -815,20 +1060,20 @@
             };
     
             /**
-             * Creates a UserCreateResponse message from a plain object. Also converts values to their respective internal types.
+             * Creates a UserCreatedOrLoggedInReply message from a plain object. Also converts values to their respective internal types.
              * @function fromObject
-             * @memberof v1.UserCreateResponse
+             * @memberof v1.UserCreatedOrLoggedInReply
              * @static
              * @param {Object.<string,*>} object Plain object
-             * @returns {v1.UserCreateResponse} UserCreateResponse
+             * @returns {v1.UserCreatedOrLoggedInReply} UserCreatedOrLoggedInReply
              */
-            UserCreateResponse.fromObject = function fromObject(object) {
-                if (object instanceof $root.v1.UserCreateResponse)
+            UserCreatedOrLoggedInReply.fromObject = function fromObject(object) {
+                if (object instanceof $root.v1.UserCreatedOrLoggedInReply)
                     return object;
-                var message = new $root.v1.UserCreateResponse();
+                var message = new $root.v1.UserCreatedOrLoggedInReply();
                 if (object.user != null) {
                     if (typeof object.user !== "object")
-                        throw TypeError(".v1.UserCreateResponse.user: object expected");
+                        throw TypeError(".v1.UserCreatedOrLoggedInReply.user: object expected");
                     message.user = $root.v1.User.fromObject(object.user);
                 }
                 if (object.token != null)
@@ -837,15 +1082,15 @@
             };
     
             /**
-             * Creates a plain object from a UserCreateResponse message. Also converts values to other types if specified.
+             * Creates a plain object from a UserCreatedOrLoggedInReply message. Also converts values to other types if specified.
              * @function toObject
-             * @memberof v1.UserCreateResponse
+             * @memberof v1.UserCreatedOrLoggedInReply
              * @static
-             * @param {v1.UserCreateResponse} message UserCreateResponse
+             * @param {v1.UserCreatedOrLoggedInReply} message UserCreatedOrLoggedInReply
              * @param {$protobuf.IConversionOptions} [options] Conversion options
              * @returns {Object.<string,*>} Plain object
              */
-            UserCreateResponse.toObject = function toObject(message, options) {
+            UserCreatedOrLoggedInReply.toObject = function toObject(message, options) {
                 if (!options)
                     options = {};
                 var object = {};
@@ -861,17 +1106,17 @@
             };
     
             /**
-             * Converts this UserCreateResponse to JSON.
+             * Converts this UserCreatedOrLoggedInReply to JSON.
              * @function toJSON
-             * @memberof v1.UserCreateResponse
+             * @memberof v1.UserCreatedOrLoggedInReply
              * @instance
              * @returns {Object.<string,*>} JSON object
              */
-            UserCreateResponse.prototype.toJSON = function toJSON() {
+            UserCreatedOrLoggedInReply.prototype.toJSON = function toJSON() {
                 return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
             };
     
-            return UserCreateResponse;
+            return UserCreatedOrLoggedInReply;
         })();
     
         v1.User = (function() {

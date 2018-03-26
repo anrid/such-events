@@ -19,8 +19,8 @@ function getGoogleOAuthClient () {
     process.env.SUCH_EVENTS_GOOGLE_CLIENT_SECRET,
     redirectUrl,
   )
-  L.info('Google client id: %s', process.env.SUCH_EVENTS_GOOGLE_CLIENT_ID)
-  L.info('Google redirect url: %s', redirectUrl)
+  L.info({ message: 'Google client id: ' + process.env.SUCH_EVENTS_GOOGLE_CLIENT_ID })
+  L.info({ message: 'Google redirect url: ' + redirectUrl })
   return oauth2Client
 }
 
@@ -45,7 +45,7 @@ function getUserProfile (client, code: string): Promise<any> {
     client.getToken(code, function (err, tokens) {
       // Now tokens contains an access_token and an optional refresh_token. Save them.
       if (err) {
-        L.error('Google getToken error: %s', err.message)
+        L.error({ message: 'Google getToken error', error: err.message })
         return reject(new Error('Failed google.getToken(): ' + err.message))
       }
       client.setCredentials(tokens)
@@ -55,10 +55,15 @@ function getUserProfile (client, code: string): Promise<any> {
       })
       oauth2.userinfo.v2.me.get(function(err, res) {
         if (err) {
-          L.error('Google get userinfo error: %s', err.message)
+          L.error({ message: 'Google get userinfo error', error: err.message })
           return reject(new Error('Failed google.userinfo.v2.me.get(): ' + err.message))
         }
-        L.info('Fetched user profile: %s (%s - %s)', res.data.name, res.data.email, res.data.hd || 'n/a')
+        L.info({
+          message: 'fetched user profile data',
+          name: res.data.name,
+          email: res.data.email,
+          domain: res.data.hd || 'n/a'
+        })
         resolve(res.data)
       })
     })

@@ -326,62 +326,178 @@ export namespace v1 {
         public toJSON(): { [k: string]: any };
     }
 
-    /** Properties of a UserCreateResponse. */
-    interface IUserCreateResponse {
+    /** Properties of a UserLogin. */
+    interface IUserLogin {
 
-        /** UserCreateResponse user */
-        user: v1.IUser;
+        /** UserLogin email */
+        email: string;
 
-        /** UserCreateResponse token */
-        token: string;
+        /** UserLogin password */
+        password: string;
     }
 
-    /** Represents a UserCreateResponse. */
-    class UserCreateResponse implements IUserCreateResponse {
+    /** Represents a UserLogin. */
+    class UserLogin implements IUserLogin {
 
         /**
-         * Constructs a new UserCreateResponse.
+         * Constructs a new UserLogin.
          * @param [properties] Properties to set
          */
-        constructor(properties?: v1.IUserCreateResponse);
+        constructor(properties?: v1.IUserLogin);
 
-        /** UserCreateResponse user. */
-        public user: v1.IUser;
+        /** UserLogin email. */
+        public email: string;
 
-        /** UserCreateResponse token. */
-        public token: string;
+        /** UserLogin password. */
+        public password: string;
 
         /**
-         * Creates a new UserCreateResponse instance using the specified properties.
+         * Creates a new UserLogin instance using the specified properties.
          * @param [properties] Properties to set
-         * @returns UserCreateResponse instance
+         * @returns UserLogin instance
          */
-        public static create(properties?: v1.IUserCreateResponse): v1.UserCreateResponse;
+        public static create(properties?: v1.IUserLogin): v1.UserLogin;
 
         /**
-         * Verifies a UserCreateResponse message.
+         * Verifies a UserLogin message.
          * @param message Plain object to verify
          * @returns `null` if valid, otherwise the reason why it is not
          */
         public static verify(message: { [k: string]: any }): (string|null);
 
         /**
-         * Creates a UserCreateResponse message from a plain object. Also converts values to their respective internal types.
+         * Creates a UserLogin message from a plain object. Also converts values to their respective internal types.
          * @param object Plain object
-         * @returns UserCreateResponse
+         * @returns UserLogin
          */
-        public static fromObject(object: { [k: string]: any }): v1.UserCreateResponse;
+        public static fromObject(object: { [k: string]: any }): v1.UserLogin;
 
         /**
-         * Creates a plain object from a UserCreateResponse message. Also converts values to other types if specified.
-         * @param message UserCreateResponse
+         * Creates a plain object from a UserLogin message. Also converts values to other types if specified.
+         * @param message UserLogin
          * @param [options] Conversion options
          * @returns Plain object
          */
-        public static toObject(message: v1.UserCreateResponse, options?: $protobuf.IConversionOptions): { [k: string]: any };
+        public static toObject(message: v1.UserLogin, options?: $protobuf.IConversionOptions): { [k: string]: any };
 
         /**
-         * Converts this UserCreateResponse to JSON.
+         * Converts this UserLogin to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
+    }
+
+    /** Properties of a UserLoginOk. */
+    interface IUserLoginOk {
+
+        /** UserLoginOk user */
+        user: v1.IUser;
+    }
+
+    /** Represents a UserLoginOk. */
+    class UserLoginOk implements IUserLoginOk {
+
+        /**
+         * Constructs a new UserLoginOk.
+         * @param [properties] Properties to set
+         */
+        constructor(properties?: v1.IUserLoginOk);
+
+        /** UserLoginOk user. */
+        public user: v1.IUser;
+
+        /**
+         * Creates a new UserLoginOk instance using the specified properties.
+         * @param [properties] Properties to set
+         * @returns UserLoginOk instance
+         */
+        public static create(properties?: v1.IUserLoginOk): v1.UserLoginOk;
+
+        /**
+         * Verifies a UserLoginOk message.
+         * @param message Plain object to verify
+         * @returns `null` if valid, otherwise the reason why it is not
+         */
+        public static verify(message: { [k: string]: any }): (string|null);
+
+        /**
+         * Creates a UserLoginOk message from a plain object. Also converts values to their respective internal types.
+         * @param object Plain object
+         * @returns UserLoginOk
+         */
+        public static fromObject(object: { [k: string]: any }): v1.UserLoginOk;
+
+        /**
+         * Creates a plain object from a UserLoginOk message. Also converts values to other types if specified.
+         * @param message UserLoginOk
+         * @param [options] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(message: v1.UserLoginOk, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+        /**
+         * Converts this UserLoginOk to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
+    }
+
+    /** Properties of a UserCreatedOrLoggedInReply. */
+    interface IUserCreatedOrLoggedInReply {
+
+        /** UserCreatedOrLoggedInReply user */
+        user: v1.IUser;
+
+        /** UserCreatedOrLoggedInReply token */
+        token: string;
+    }
+
+    /** Represents a UserCreatedOrLoggedInReply. */
+    class UserCreatedOrLoggedInReply implements IUserCreatedOrLoggedInReply {
+
+        /**
+         * Constructs a new UserCreatedOrLoggedInReply.
+         * @param [properties] Properties to set
+         */
+        constructor(properties?: v1.IUserCreatedOrLoggedInReply);
+
+        /** UserCreatedOrLoggedInReply user. */
+        public user: v1.IUser;
+
+        /** UserCreatedOrLoggedInReply token. */
+        public token: string;
+
+        /**
+         * Creates a new UserCreatedOrLoggedInReply instance using the specified properties.
+         * @param [properties] Properties to set
+         * @returns UserCreatedOrLoggedInReply instance
+         */
+        public static create(properties?: v1.IUserCreatedOrLoggedInReply): v1.UserCreatedOrLoggedInReply;
+
+        /**
+         * Verifies a UserCreatedOrLoggedInReply message.
+         * @param message Plain object to verify
+         * @returns `null` if valid, otherwise the reason why it is not
+         */
+        public static verify(message: { [k: string]: any }): (string|null);
+
+        /**
+         * Creates a UserCreatedOrLoggedInReply message from a plain object. Also converts values to their respective internal types.
+         * @param object Plain object
+         * @returns UserCreatedOrLoggedInReply
+         */
+        public static fromObject(object: { [k: string]: any }): v1.UserCreatedOrLoggedInReply;
+
+        /**
+         * Creates a plain object from a UserCreatedOrLoggedInReply message. Also converts values to other types if specified.
+         * @param message UserCreatedOrLoggedInReply
+         * @param [options] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(message: v1.UserCreatedOrLoggedInReply, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+        /**
+         * Converts this UserCreatedOrLoggedInReply to JSON.
          * @returns JSON object
          */
         public toJSON(): { [k: string]: any };

@@ -65,7 +65,11 @@ export async function setupServer (opts: ServerOptions) {
     // is listening on the given port.
     isConnected = new Promise(resolve => {
       server.listen(opts.port, () => {
-        L.info(`client=${opts.id} action=server-listening url=https://${process.env.SUCH_EVENTS_HOST}:${opts.port}`)
+        L.info({
+          client: opts.id,
+          message: 'server listening', 
+          url: `https://${process.env.SUCH_EVENTS_HOST}:${opts.port}`
+        })
         resolve()
       })
     })

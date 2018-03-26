@@ -5,6 +5,12 @@ export const EVENTS: RequestToEventMap = {
       credentials: false,
     }
   },
+  '/api/v1/login': {
+    'POST': {
+      event: 'v1.login.create',
+      credentials: false,
+    }
+  },
   '/api/v1/echo': {
     'POST': {
       event: 'v1.echo.create',

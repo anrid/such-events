@@ -26,20 +26,17 @@ export async function userCreateHandler (e, publisher) {
     password,
   }
   USERS.push(user)
-  L.info(`action=user-create id=${user.id} email=${user.email}`)
+  L.info({ action: 'user-create', user: user.id, email: user.email })
 
-  // Create a token on fly.
+  // Create a new access token as part of sign up.
   const token = Jwt.createAccessToken(user.id, user.email)
 
   // NOTE: Always create outbound events via the protobufjs helper !
   const o1 = P.create(T.v1.UserCreateOk, { user, token })
   publisher('v1.user.create.ok', o1)
 
-  const o2 = P.create(T.v1.UserCreateResponse, { user, token })
-  const o3 = P.create(T.v1.Broadcast, {
-    type: 'v1.user.create.ok',
-    payload: JSON.stringify(o2),
-  })
+  const o2 = P.create(T.v1.UserCreatedOrLoggedInReply, { user, token })
+  const o3 = P.create(T.v1.Broadcast, { type: 'v1.user.create.ok', payload: JSON.stringify(o2) })
   publisher('v1.broadcast', o3)
 }
 
@@ -51,3 +48,32 @@ export async function userUpdateHandler (e, publisher) {
   user[e.prop] = e.value
   publisher('v1.user.update.ok', { user })
 }
+
+export async function userLoginHandler (e, publisher) {
+  const m = P.create(T.v1.UserLogin, e.data)
+
+  const user = USERS.find(x => x.email === m.email)
+  if (!user) {
+    L.info({ action: 'login-failed', email: m.email, error: `no user found` })
+    return publisher('v1.user.login.error', { error: 'invalid email or password' })
+  }
+
+  const password = Crypto.pbkdf2Sync(m.password, user.salt, 100, 64, 'sha512').toString('hex')
+  if (password !== user.password) {
+    L.info({ action: 'login-failed', email: m.email, error: `invalid password` })
+    return publisher('v1.user.login.error', { error: 'invalid email or password' })
+  }
+  
+  L.info({ action: 'login-successful',  user: user.id, email: user.email })
+
+  // Create a new access token.
+  const token = Jwt.createAccessToken(user.id, user.email)
+
+  const o1 = P.create(T.v1.UserLoginOk, { user })
+  publisher('v1.user.login.ok', o1)
+
+  const o2 = P.create(T.v1.UserCreatedOrLoggedInReply, { user, token })
+  const o3 = P.create(T.v1.Broadcast, { type: 'v1.user.login.ok', payload: JSON.stringify(o2) })
+  publisher('v1.broadcast', o3)
+}
+

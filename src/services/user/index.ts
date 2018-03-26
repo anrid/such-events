@@ -11,5 +11,6 @@ export const service = runService({
   eventHandlers: {
     'v1.user.create': H.userCreateHandler,
     'v1.user.update': H.userUpdateHandler,
+    'v1.user.login': H.userLoginHandler,
   },
 })

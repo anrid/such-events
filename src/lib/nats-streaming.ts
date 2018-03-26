@@ -20,26 +20,28 @@ export function getConnection (clientId: string | null): Promise<Stan.Stan> {
       encoding: 'binary',
     })
 
-    nc.on('close', () => L.info(`[NATS] action=connection-closed cluster=${clusterId} client=${id}`))
+    nc.on('close', () => L.info({ tag: 'NATS', message: 'connection closed', cluster: clusterId, client: id }))
 
     const clusterId = process.env.SUCH_EVENTS_NATS_CLUSTER_NAME
-    L.info(`[NATS] action=connecting cluster=${clusterId} client=${id}`) 
+    L.info({ tag: 'NATS', message: 'connecting', cluster: clusterId, client: id }) 
 
     const conn = Stan.connect(clusterId, id, { nc })
 
     conn.on('connect', () => {
-      L.info(`[NATS] action=connected cluster=${clusterId} client=${id}`)
+      L.info({ tag: 'NATS', message: 'connected', cluster: clusterId, client: id })
       resolve(conn)
     })
 
-    conn.on('reconnecting', () => L.info(`[NATS] action=reconnecting cluster=${clusterId} client=${id}`))
-    conn.on('reconnect', () => L.info(`[NATS] action=reconnected cluster=${clusterId} client=${id}`))
-    conn.on('error', err => L.error(`[NATS] action=connection-error cluster=${clusterId} client=${id} error=%s`, err))
+    conn.on('reconnecting', () => L.info({ tag: 'NATS', message: 'reconnecting', cluster: clusterId, client: id }))
+    conn.on('reconnect', () => L.info({ tag: 'NATS', message: 'reconnected', cluster: clusterId, client: id }))
+    conn.on('error', err => L.error({
+      tag: 'NATS', message: 'connection error', cluster: clusterId, client: id, error: err.message
+    }))
 
     conn['clientId'] = id
     conn.close = () => {
-      L.info(`[NATS] action=connection-closing cluster=${clusterId} client=${id}`)
       nc.close()
+      L.info({ tag: 'NATS', message: 'connection closing', cluster: clusterId, client: id })
     }
   })
 }
@@ -58,12 +60,12 @@ function createId (prefix: string = '') {
 
 function createSubscription (conn: Stan.Stan, a: CreateSubscriptionOptions) {
   const opts = conn.subscriptionOptions()
-  let optsLog = []
+  let optsLog: any = { }
   let clientId = conn['clientId']
 
   if (a.durable) {
     opts.setDurableName(a.durable)
-    optsLog.push(`durable=true`)
+    optsLog.durable = true
     clientId += `.${a.durable}`
   }
   if (a.fromTimeAgo) {
@@ -72,30 +74,30 @@ function createSubscription (conn: Stan.Stan, a: CreateSubscriptionOptions) {
     if (isNaN(v)) v = 0
     const startTime = Moment().subtract(v, unit)
     opts.setStartTime(startTime.toDate())
-    optsLog.push(`from=${startTime.format()}`)
+    optsLog.from = startTime.format()
   }
   if (a.fromBeginning) {
     opts.setDeliverAllAvailable()
-    optsLog.push(`from=beginning`)
+    optsLog.from = 'beginning'
   }
   if (a.manualAckMode) {
     opts.setManualAckMode(true)
-    optsLog.push('manualAckMode=true')
+    optsLog.manualAckMode = true
   }
   if (a.queueGroup) clientId += `.group.${a.queueGroup}`
   
   // Allow no more than <max> unacked message in-flight.
   const max = a.max || 100
   opts.setMaxInFlight(max)
-  optsLog.push(`max=${max}`)
+  optsLog.maxInFlight = max
 
   // Wait no longer than 15 seconds for a message to be acked.
   opts.setAckWait(15 * 1000)
 
-  L.info(
-    `[NATS] action=subscribe-to source=${a.source} client=${clientId} subject=${a.subject} ` +
-    optsLog.join(' ')
-  )
+  L.info({
+    tag: 'NATS', message: 'subscribing',
+    source: a.source, client: clientId, subject: a.subject, options: optsLog,
+  })
   const sub = conn.subscribe(a.subject, a.queueGroup || null, opts)
   
   sub.on('message', (msg: Stan.Message) => {
@@ -108,23 +110,32 @@ function createSubscription (conn: Stan.Stan, a: CreateSubscriptionOptions) {
   // Users of the subscription are then able to just do `await sub.isReady`
   sub['isReady'] = new Promise(resolve => {
     sub.on('ready', () => {
-      L.info(
-        `[NATS] action=subscription-ready source=${a.source} client=${clientId} subject=${a.subject} ` +
-        optsLog.join(' ')
-      )
+      L.info({
+        tag: 'NATS', message: 'subscription ready',
+        source: a.source, client: clientId, subject: a.subject, options: optsLog,
+      })
       resolve()
     })
   })
 
   sub.on('error', err => {
-    L.error(`[NATS] action=subscription-error source=${a.source} client=${clientId} error=${err.message}`)
-    L.error('[NATS]', err)
+    L.error({
+      tag: 'NATS', message: 'subscription error',
+      source: a.source, client: clientId, error: err.message
+    })
+    L.error(err)
   })
   sub.on('unsubscribed', () => (
-    L.info(`[NATS] action=unsubscribed source=${a.source} client=${clientId} subject=${a.subject}`)
+    L.info({
+      tag: 'NATS', message: 'unsubscribed',
+      source: a.source, client: clientId, subject: a.subject,
+    })
   ))
   sub.on('close', () => (
-    L.info(`[NATS] action=subscription-closed source=${a.source} client=${clientId} subject=${a.subject}`)
+    L.info({
+      tag: 'NATS', message: 'subscription closed',
+      source: a.source, client: clientId, subject: a.subject,
+    })
   ))
 
   return sub
@@ -158,10 +169,10 @@ function createPublisher (conn: Stan.Stan, source: string, parentEvent: EventMes
         break
       } catch (err) {
         if (err.message !== 'publish ack timeout') break
-        L.info(
-          `[NATS] action=retry-publish-event event=${event} source=${source} ` +
-          `request=${requestId} delay=${retryDelay}`
-        )
+        L.info({
+          tag: 'NATS', message: 'retrying publish event', event, source,
+          request: requestId, delay: retryDelay,
+        })
         await new Promise(r => setTimeout(r, 5000))
       }
     }
@@ -173,9 +184,9 @@ export function subscribeToEvents (conn: Stan.Stan, a: SubscriberOptions) {
     let e: EventMessage
     let publisher: Publisher
     let data = null
-    let clientId = conn['clientId']
-    if (a.durable) clientId += `.${a.durable}`
-    if (a.queueGroup) clientId += `.group.${a.queueGroup}`
+    let id = conn['clientId']
+    if (a.durable) id += `.${a.durable}`
+    if (a.queueGroup) id += `.group.${a.queueGroup}`
 
     try {
       const timer = Date.now()
@@ -189,23 +200,25 @@ export function subscribeToEvents (conn: Stan.Stan, a: SubscriberOptions) {
       await handler(e, publisher)
 
       const took = Date.now() - timer
-      let total = ((e.requestCreated ? Date.now() - e.requestCreated : 0) / 1000).toFixed(3)
-      L.info(
-        `[NATS] action=event event=${e.event} source=${e.source} seq=${msg.getSequence()} ` + 
-        `client=${clientId} request=${e.requestId} took=${took} total=${total}`
-      )
+      let total = e.requestCreated ? Date.now() - e.requestCreated : 0
+      L.info({
+        tag: 'NATS', message: 'event handled', event: e.event, source: e.source,
+        seq: msg.getSequence(), client: id, request: e.requestId, took, total,
+      })
     } catch (err) {
       if (err instanceof SyntaxError) {
-        L.error(`[NATS] malformed event message, data="${data}"`)  
+        L.error({ tag: 'NATS', message: 'malformed event message', data: data })  
       } else {
         const event = e ? e.event : 'unknown'
         const source = e ? e.source : 'unknown'
-        const requestOrMessage = e ? `request=${e.requestId}` : `msg=${data}`
-        L.error(
-          `[NATS] action=event-error event=${event} source=${source} seq=${msg.getSequence()} ` +
-          `client=${clientId} ${requestOrMessage} error=${err.message}`
-        )
-        L.error('[NATS]', err)
+        const requestId = e ? e.requestId : 'none'
+        L.error({
+          tag: 'NATS', message: 'handle event error', event, source,
+          seq: msg.getSequence(), client: id, request: requestId, error: err.message
+        })
+        L.error(err)
+        
+        // Publish default error. TODO: Remove this later perhaps.
         if (publisher) {
           publisher(`${event}.error`, { error: err.message })
         }
@@ -232,27 +245,28 @@ export async function publishEvent (conn: Stan.Stan, e: EventMessage) {
   if (!e.requestId) e.requestId = createRequestId()
   if (!e.requestCreated) e.requestCreated = Date.now()
 
+  const id = conn['clientId']
   const payload = JSON.stringify(e)
   const total = e.requestCreated ? Date.now() - e.requestCreated : 0
 
-  L.info(
-    `[NATS] action=publish event=${e.event} source=${e.source} ` +
-    `client=${conn['clientId']} request=${e.requestId} total=${total}`
-  )  
+  L.info({
+    tag: 'NATS', message: 'publish event', event: e.event,
+    source: e.source, client: id, request: e.requestId, total: total
+  })  
 
   return new Promise((resolve, reject) => {
     conn.publish(EVENT_SOURCE_SUBJECT, payload, (err, _guid) => {
       if (err) {
-        L.error(
-          `[NATS] action=publish-ack-timeout-error event=${e.event} source=${e.source} ` + 
-          `client=${conn['clientId']} request=${e.requestId} data=%j error=%s`, e.data, err
-        )
+        L.error({
+          tag: 'NATS', message: 'publish ack timeout error', event: e.event, source: e.source,
+          client: id, request: e.requestId, data: e.data, error: err.message
+        })
         return reject(new Error('publish ack timeout'))
       }
-      L.info(
-        `[NATS] action=publish-ack event=${e.event} source=${e.source} ` +
-        `client=${conn['clientId']} request=${e.requestId} total=${total}`
-      )
+      L.info({
+        tag: 'NATS', message: 'publish acked', event: e.event, source: e.source,
+        client: id, request: e.requestId, total: total
+      })
       resolve()
     })
   })

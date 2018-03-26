@@ -11,8 +11,16 @@ message UserCreateOk {
   required User user = 1;
 }
 
-// Used to reply to user.create calls.
-message UserCreateResponse {
+message UserLogin {
+  required string email = 1;
+  required string password = 2;
+}
+
+message UserLoginOk {
+  required User user = 1;
+}
+
+message UserCreatedOrLoggedInReply {
   required User user = 1;
   required string token = 2;
 }

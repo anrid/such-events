@@ -46,7 +46,7 @@ export function jwtMiddleware (req, res, next) {
   // RFC6750 states the access_token MUST NOT be provided
   // in more than one place in a single request.
   if (error) {
-    return res.status(400).send('RFC6750 access_token found in more than one place in a single request')
+    return res.status(400).json({ error: 'RFC6750 access_token found in more than one place in a single request' })
   }
 
   try {
@@ -56,7 +56,7 @@ export function jwtMiddleware (req, res, next) {
     }
     next()
   } catch (err) {
-    L.error(err)
-    return res.status(400).send('Invalid token')
+    L.error({ message: 'JWT middleware error', token: token, error: err.message })
+    return res.status(400).json({ error: 'Invalid token: ' + err.message })
   }
 }

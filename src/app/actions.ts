@@ -1,4 +1,5 @@
 import { history } from './history'
+import { apiCall } from './api'
 
 export const INC_COUNTER = 'INC_COUNTER'
 export const SET_SESSION = 'SET_SESSION'
@@ -14,6 +15,8 @@ export const login = (email, _password) =>
     
     dispatch(setSession(session))
     console.log('STATE:', getState())
+
+    await apiCall('/api/v1/echo', { test: 1 })
     
     setSessionLocalStorage(session)  
     

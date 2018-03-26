@@ -18,6 +18,8 @@ export async function runService (_opts: RunServiceOptions): Promise<RunServiceR
     durable: opts.id
   })
 
+  // registerExitHandler()
+
   return {
     sub,
     stan,

@@ -1,82 +1,55 @@
 import * as test from 'tape'
-import * as User from './index'
-import * as Nats from '../../lib/nats-streaming'
+import * as H from './handlers'
+import * as P from '../../lib/proto'
+import * as T from '../../../proto/compiled'
 
-const source = 'test-user-service'
-let svc
+test('user-service - on v1.user.create test', async t => {
+  t.plan(6)
 
-test('before tests', async t => {
-  // Setup service.
-  svc = await User.service
-  t.end()
-})
-
-test('user-service - v1.user.create - failed due to missing field test', async t => {
-  t.plan(1)
-
-  const sub = Nats.subscribeToEvents(svc.stan, {
-    source,
-    queueGroup: null,
-    eventHandlers: {
-      'v1.user.create.ok': async () => t.fail('should fail due to missing "email" field'),
-      'v1.user.create.error': async e => {
-        sub.unsubscribe()
-        t.ok(
-          e.data.error.includes('email: string expected'),
-          'should get a validation error saying email is missing'
-        )
-      }
-    },
-  })
-
-  Nats.publishEvent(svc.stan, {
-    source,
-    event: 'v1.user.create',
-    data: {
+  const event = {
+    data: P.create(T.v1.UserCreate, {
       name: 'Ace Base',
-      emailll: 'ace.base@example.com',
-      password: '12345678',
-    },
-    credentials: null,
+      email: 'ace@base.se',
+      password: '123456',
+    })
+  }
+
+  await H.userCreateHandler(event, (publishedEvent: string, data) => {
+    if (publishedEvent === 'v1.user.create.ok') {
+      t.doesNotThrow(() => P.create(T.v1.UserCreateOk, data))
+      t.equals(data.user.name, 'Ace Base', 'should have user.name = "Ace Base"')
+      t.ok(data.user.id, 'should have a new user id')
+    }
+    if (publishedEvent === 'v1.broadcast') {
+      const p = JSON.parse(data.payload)
+      t.doesNotThrow(() => P.create(T.v1.UserCreatedOrLoggedInReply, p))
+      t.equals(p.user.email, 'ace@base.se', 'should have user.email = "ace@base.se"')
+      t.ok(p.token.length > 40, 'should have a token that’s longer than 40 chars')
+    }
   })
 })
 
-test('user-service - v1.user.create - user created successfully test', async t => {
-  t.plan(7)
+test('user-service - on v1.user.login test', async t => {
+  t.plan(6)
 
-  Nats.subscribeToEvents(svc.stan, {
-    source,
-    queueGroup: null,
-    eventHandlers: {
-      'v1.user.create.ok': async e => {
-        // console.log('e=', e)
-        t.equals(e.data.user.email, 'ace.base@example.com', 'should create a user successfully')
-        t.equals(e.data.user.password, undefined, 'should not find a "password" prop in the message')
-        t.equals(e.data.user.salt, undefined, 'should not find a "salt" prop in the message')
-        t.equals(e.data.token, undefined, 'should not find a "token" prop in the message')
-      },
-      'v1.broadcast': async e => {
-        t.equals(e.data.type, 'v1.user.create.ok', 'should get a broadcast of type "v1.user.create.ok"')
-        const d = JSON.parse(e.data.payload)
-        t.ok(d.user.id, 'should get a user object in broadcast payload')
-        t.ok(d.token, 'should get an access token in broadcast payload')
-      },
-      'v1.user.create.error': async () => t.fail('should not get a validation error'),
-    },
+  const event = {
+    data: P.create(T.v1.UserLogin, {
+      email: 'ace@base.se',
+      password: '123456',
+    })
+  }
+
+  await H.userLoginHandler(event, (publishedEvent: string, data) => {
+    if (publishedEvent === 'v1.user.login.ok') {
+      t.doesNotThrow(() => P.create(T.v1.UserLoginOk, data))
+      t.equals(data.user.name, 'Ace Base', 'should have user.name = "Ace Base"')
+      t.ok(data.user.id, 'should have a new user id')
+    }
+    if (publishedEvent === 'v1.broadcast') {
+      const p = JSON.parse(data.payload)
+      t.doesNotThrow(() => P.create(T.v1.UserCreatedOrLoggedInReply, p))
+      t.equals(p.user.email, 'ace@base.se', 'should have user.email = "ace@base.se"')
+      t.ok(p.token.length > 40, 'should have a token that’s longer than 40 chars')
+    }
   })
-
-  Nats.publishEvent(svc.stan, {
-    source,
-    event: 'v1.user.create',
-    data: {
-      name: 'Ace Base',
-      email: 'ace.base@example.com',
-      password: '12345678',
-    },
-    credentials: null,
-  })
-})
-
-test.onFinish(() => {
-  svc.close()
 })
