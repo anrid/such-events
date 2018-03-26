@@ -6,6 +6,7 @@ import * as Jwt from '../../lib/jwt'
 import * as T from '../../../proto/compiled'
 
 const USERS = []
+createTestUsers()
 
 export async function userCreateHandler (e, publisher) {
   const m = P.create(T.v1.UserCreate, e.data)
@@ -15,8 +16,8 @@ export async function userCreateHandler (e, publisher) {
     return publisher('v1.user.create.error', { error: 'email already registered' })
   }
 
-  const salt = Crypto.randomBytes(16).toString('hex')
-  const password = Crypto.pbkdf2Sync(m.password, salt, 100, 64, 'sha512').toString('hex')
+  const salt = createSalt()
+  const password = createPassword(m.password, salt)
   
   const user = {
     id: generate(),
@@ -26,7 +27,7 @@ export async function userCreateHandler (e, publisher) {
     password,
   }
   USERS.push(user)
-  L.info({ action: 'user-create', user: user.id, email: user.email })
+  L.info({ message: 'user created', user: user.id, email: user.email })
 
   // Create a new access token as part of sign up.
   const token = Jwt.createAccessToken(user.id, user.email)
@@ -54,17 +55,17 @@ export async function userLoginHandler (e, publisher) {
 
   const user = USERS.find(x => x.email === m.email)
   if (!user) {
-    L.info({ action: 'login-failed', email: m.email, error: `no user found` })
+    L.info({ message: 'login-failed', email: m.email, error: `no user found` })
     return publisher('v1.user.login.error', { error: 'invalid email or password' })
   }
 
-  const password = Crypto.pbkdf2Sync(m.password, user.salt, 100, 64, 'sha512').toString('hex')
+  const password = createPassword(m.password, user.salt)
   if (password !== user.password) {
-    L.info({ action: 'login-failed', email: m.email, error: `invalid password` })
+    L.info({ message: 'login-failed', email: m.email, error: `invalid password` })
     return publisher('v1.user.login.error', { error: 'invalid email or password' })
   }
   
-  L.info({ action: 'login-successful',  user: user.id, email: user.email })
+  L.info({ message: 'login successful',  user: user.id, email: user.email })
 
   // Create a new access token.
   const token = Jwt.createAccessToken(user.id, user.email)
@@ -77,3 +78,25 @@ export async function userLoginHandler (e, publisher) {
   publisher('v1.broadcast', o3)
 }
 
+function createPassword (plaintextPassword: string, salt: string) {
+  return Crypto.pbkdf2Sync(plaintextPassword, salt, 100, 64, 'sha512').toString('hex')
+}
+
+function createSalt () {
+  return Crypto.randomBytes(16).toString('hex')
+}
+
+export function createTestUsers () {
+  const salt = createSalt()
+  const password = createPassword('123456', salt)
+  
+  const user1 = {
+    id: 'joe-test',
+    name: 'Joe Schmoe',
+    email: 'joe@example.com',
+    salt,
+    password,
+  }
+
+  USERS.push(user1)
+}

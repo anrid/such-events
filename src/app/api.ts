@@ -1,12 +1,11 @@
 import { getCurrentStore } from './store'
 
-export function apiCall (path, data) {
-  const url = `${window['Config']['API_URL']}/${path}`
-  console.log('url=', url)
+export function apiCall (path: string, data: any) {
+  const url = `${window['Config']['API_URL']}${path}`
   return postData(url, data)
 }
 
-function postData (url, data) {
+function postData (url: string, data: any) {
   const headers = {
     'content-type': 'application/json'
   }
@@ -18,19 +17,24 @@ function postData (url, data) {
     headers['authorization'] = `Bearer ${session.token}`
   }
 
+  console.log({ tag: 'API', message: 'send', url, data })
   // '*' marks default.
   return fetch(url, {
     method: 'POST',                   // *GET, POST, PUT, DELETE, etc.
-    body: JSON.stringify(data),       // must match 'Content-Type' header
+    body: JSON.stringify(data),       // Must match 'Content-Type' header.
     headers,
     cache: 'default',                 // *default, no-cache, reload, force-cache, only-if-cached
     mode: 'cors',                     // no-cors, cors, *same-origin
     redirect: 'follow',               // *manual, follow, error
     referrer: 'such-events-client',
   })
-  .then(response => response.json())  // parses response to JSON
+  .then(response => response.json())  // Parses response to JSON.
+  .then(json => {
+    console.log({ tag: 'API', message: 'receive', url, json })
+    return json
+  })
   .catch(err => {
-    console.error('[API] error:', err)
+    console.error({ tag: 'API', message: err.message, url, data, error: err })
     throw err
   })
 }

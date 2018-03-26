@@ -31,7 +31,6 @@ class Login extends React.Component {
   handleSubmit (e) {
     e.preventDefault()
     const { email, password } = this.state
-    console.log('e=', email, password)
     this.props.login(email, password)
   }
 

@@ -263,10 +263,10 @@ export async function publishEvent (conn: Stan.Stan, e: EventMessage) {
         })
         return reject(new Error('publish ack timeout'))
       }
-      L.info({
-        tag: 'NATS', message: 'publish acked', event: e.event, source: e.source,
-        client: id, request: e.requestId, total: total
-      })
+      // L.info({
+      //   tag: 'NATS', message: 'publish acked', event: e.event, source: e.source,
+      //   client: id, request: e.requestId, total: total
+      // })
       resolve()
     })
   })

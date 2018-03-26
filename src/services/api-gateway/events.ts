@@ -7,7 +7,7 @@ export const EVENTS: RequestToEventMap = {
   },
   '/api/v1/login': {
     'POST': {
-      event: 'v1.login.create',
+      event: 'v1.user.login',
       credentials: false,
     }
   },

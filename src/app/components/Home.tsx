@@ -1,21 +1,24 @@
 import * as React from 'react'
 import { connect } from 'react-redux'
-import { inc } from '../actions'
+import * as actions from '../actions'
 const styles = require('./Home.css')
 
-const Home = ({ counter, inc }) => (
+const Home = ({ counter, inc, signOut }) => (
   <div className={styles.root}>
     <h2>Home</h2>
-    <button className={styles.button} onClick={inc}>
-      counter = {counter}
-    </button>
+    <div>
+      <button onClick={signOut}>Sign Out</button>
+    </div>
+    <div>
+      <button className={styles.button} onClick={inc}>
+        counter = {counter}
+      </button>
+    </div>  
   </div>
 )
 
 const stateToProps = state => ({
   counter: state.app.counter,
 })
-
-const actions = { inc }
 
 export default connect(stateToProps, actions)(Home)

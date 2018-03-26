@@ -27,17 +27,10 @@ const PrivateRoute = ({ component: Component, ...rest }) => (
   />
 )
 
-const Logout = () => (
-  <div>
-    Bye !
-  </div>
-)
-
 const Routes = () => (
   <Router history={history}>
     <Switch>
       <Route path="/login" component={Login} />
-      <Route path="/logout" component={Logout} />
       <PrivateRoute path="/" component={Home} />
     </Switch>
   </Router>
