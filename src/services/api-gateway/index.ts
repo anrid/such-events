@@ -25,7 +25,7 @@ export async function setupServer (opts: ServerOptions) {
 
   // Enable compression for all requests.
   const compression = require('compression')
-  app.use(compression())
+  app.use(compression({ threshold: 0 }))
 
   // Enable CORS for all requests.
   const cors = require('cors')

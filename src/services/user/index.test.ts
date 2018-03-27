@@ -2,8 +2,14 @@ import * as test from 'tape'
 import * as H from './handlers'
 import * as P from '../../lib/proto'
 import * as T from '../../../proto/compiled'
+import * as Db from './db'
 
 let testSession: any = { }
+
+test('user-service - before tests', async t => {
+  await Db.init()
+  t.end()
+})
 
 test('user-service - on v1.user.create test', async t => {
   t.plan(6)
@@ -58,11 +64,11 @@ test('user-service - on v1.user.login test', async t => {
 })
 
 test('user-service - on v1.user.update test', async t => {
-  t.plan(4)
+  t.plan(5)
 
   const event = {
     data: P.create(T.v1.UserUpdate, {
-      update: 'acee@base.see',
+      update: { email: 'acee@base.see' },
       credentials: {
         id: testSession.aceBase.id,
         email: testSession.aceBase.email,
@@ -79,7 +85,9 @@ test('user-service - on v1.user.update test', async t => {
     if (publishedEvent === 'v1.broadcast') {
       const p = JSON.parse(data.payload)
       t.doesNotThrow(() => P.create(T.v1.UserUpdateOk, p))
+      t.equals(p.userId, testSession.aceBase.id, 'should return the userId of the updated user as part of broadcast')
     }
   })
 })
 
+test.onFinish(() => Db.close())

@@ -1,10 +1,10 @@
 import { generate } from 'shortid'
 import { L } from '../../lib/logger'
-import * as Crypto from 'crypto'
 import * as P from '../../lib/proto'
 import * as Jwt from '../../lib/jwt'
 import * as T from '../../../proto/compiled'
 import * as Db from './db'
+import { createSalt, createPassword } from './util'
 
 export async function userCreateHandler (e, publisher) {
   const m = P.create(T.v1.UserCreate, e.data)
@@ -84,27 +84,4 @@ export async function userLoginHandler (e, publisher) {
   const o2 = P.create(T.v1.UserCreatedOrLoggedInReply, { user, token })
   const o3 = P.create(T.v1.Broadcast, { type: 'v1.user.login.ok', payload: JSON.stringify(o2) })
   publisher('v1.broadcast', o3)
-}
-
-function createPassword (plaintextPassword: string, salt: string) {
-  return Crypto.pbkdf2Sync(plaintextPassword, salt, 100, 64, 'sha512').toString('hex')
-}
-
-function createSalt () {
-  return Crypto.randomBytes(16).toString('hex')
-}
-
-export async function createTestUsers () {
-  const salt = createSalt()
-  const password = createPassword('123456', salt)
-  
-  const user1 = {
-    id: 'joe-test',
-    name: 'Joe Schmoe',
-    email: 'joe@example.com',
-    salt,
-    password,
-  }
-
-  await Db.insert('users', user1)
 }
