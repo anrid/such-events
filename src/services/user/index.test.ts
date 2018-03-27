@@ -3,6 +3,8 @@ import * as H from './handlers'
 import * as P from '../../lib/proto'
 import * as T from '../../../proto/compiled'
 
+let testSession: any = { }
+
 test('user-service - on v1.user.create test', async t => {
   t.plan(6)
 
@@ -19,6 +21,7 @@ test('user-service - on v1.user.create test', async t => {
       t.doesNotThrow(() => P.create(T.v1.UserCreateOk, data))
       t.equals(data.user.name, 'Ace Base', 'should have user.name = "Ace Base"')
       t.ok(data.user.id, 'should have a new user id')
+      testSession.aceBase = data.user
     }
     if (publishedEvent === 'v1.broadcast') {
       const p = JSON.parse(data.payload)
@@ -53,3 +56,30 @@ test('user-service - on v1.user.login test', async t => {
     }
   })
 })
+
+test('user-service - on v1.user.update test', async t => {
+  t.plan(4)
+
+  const event = {
+    data: P.create(T.v1.UserUpdate, {
+      update: 'acee@base.see',
+      credentials: {
+        id: testSession.aceBase.id,
+        email: testSession.aceBase.email,
+      },
+    })
+  }
+
+  await H.userUpdateHandler(event, (publishedEvent: string, data) => {
+    if (publishedEvent === 'v1.user.update.ok') {
+      t.doesNotThrow(() => P.create(T.v1.UserUpdateOk, data))
+      t.equals(data.update.email, 'acee@base.see', 'should now have user.email = "acee@base.see"')
+      t.equals(data.userId, testSession.aceBase.id, 'should return the userId of the updated user')
+    }
+    if (publishedEvent === 'v1.broadcast') {
+      const p = JSON.parse(data.payload)
+      t.doesNotThrow(() => P.create(T.v1.UserUpdateOk, p))
+    }
+  })
+})
+

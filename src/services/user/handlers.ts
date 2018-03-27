@@ -4,21 +4,20 @@ import * as Crypto from 'crypto'
 import * as P from '../../lib/proto'
 import * as Jwt from '../../lib/jwt'
 import * as T from '../../../proto/compiled'
-
-const USERS = []
-createTestUsers()
+import * as Db from './db'
 
 export async function userCreateHandler (e, publisher) {
   const m = P.create(T.v1.UserCreate, e.data)
 
-  const exists = USERS.find(x => x.email === m.email)
+  const exists = await Db.findOne('users', { email: m.email })
   if (exists) {
-    return publisher('v1.user.create.error', { error: 'email already registered' })
+    L.error({ tag: 'USER', error: 'email already registered', email: m.email })
+    return publisher('v1.user.create.error', { error: 'email already registered', email: m.email })
   }
 
   const salt = createSalt()
   const password = createPassword(m.password, salt)
-  
+
   const user = {
     id: generate(),
     name: m.name,
@@ -26,8 +25,8 @@ export async function userCreateHandler (e, publisher) {
     salt,
     password,
   }
-  USERS.push(user)
-  L.info({ message: 'user created', user: user.id, email: user.email })
+  await Db.insert('users', user)
+  L.info({ tag: 'USER', message: 'user created', user: user.id, email: user.email })
 
   // Create a new access token as part of sign up.
   const token = Jwt.createAccessToken(user.id, user.email)
@@ -42,30 +41,39 @@ export async function userCreateHandler (e, publisher) {
 }
 
 export async function userUpdateHandler (e, publisher) {
-  const user = USERS.find(x => x.id === e.id)
+  const m: T.v1.UserUpdate = P.create(T.v1.UserUpdate, e.data)
+
+  const user = await Db.findOne('users', { _id: m.credentials.id })
   if (!user) {
+    L.error({ tag: 'USER', handler: 'update', error: 'user not found', user: m.credentials.id })
     return publisher('v1.user.update.error', { error: `user ${e.id} not found` })  
   }
-  user[e.prop] = e.value
-  publisher('v1.user.update.ok', { user })
+
+  // TODO: Perform the actual update.
+
+  const o1 = P.create(T.v1.UserUpdateOk, { userId: m.credentials.id, update: m.update })
+  publisher('v1.user.update.ok', o1)
+
+  const o2 = P.create(T.v1.Broadcast, { type: 'v1.user.update.ok', payload: JSON.stringify(o1) })
+  publisher('v1.broadcast', o2)
 }
 
 export async function userLoginHandler (e, publisher) {
   const m = P.create(T.v1.UserLogin, e.data)
 
-  const user = USERS.find(x => x.email === m.email)
+  const user = await Db.findOne('users', { email: m.email })
   if (!user) {
-    L.info({ message: 'login-failed', email: m.email, error: `no user found` })
+    L.info({ tag: 'USER', message: 'login failed', email: m.email, error: `no user found` })
     return publisher('v1.user.login.error', { error: 'invalid email or password' })
   }
 
   const password = createPassword(m.password, user.salt)
   if (password !== user.password) {
-    L.info({ message: 'login-failed', email: m.email, error: `invalid password` })
+    L.info({ tag: 'USER', message: 'login failed', email: m.email, error: `invalid password` })
     return publisher('v1.user.login.error', { error: 'invalid email or password' })
   }
   
-  L.info({ message: 'login successful',  user: user.id, email: user.email })
+  L.info({ tag: 'USER', message: 'login successful',  user: user.id, email: user.email })
 
   // Create a new access token.
   const token = Jwt.createAccessToken(user.id, user.email)
@@ -86,7 +94,7 @@ function createSalt () {
   return Crypto.randomBytes(16).toString('hex')
 }
 
-export function createTestUsers () {
+export async function createTestUsers () {
   const salt = createSalt()
   const password = createPassword('123456', salt)
   
@@ -98,5 +106,5 @@ export function createTestUsers () {
     password,
   }
 
-  USERS.push(user1)
+  await Db.insert('users', user1)
 }

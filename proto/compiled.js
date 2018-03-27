@@ -77,18 +77,6 @@
             Broadcast.prototype.targets = $util.emptyArray;
     
             /**
-             * Creates a new Broadcast instance using the specified properties.
-             * @function create
-             * @memberof v1.Broadcast
-             * @static
-             * @param {v1.IBroadcast=} [properties] Properties to set
-             * @returns {v1.Broadcast} Broadcast instance
-             */
-            Broadcast.create = function create(properties) {
-                return new Broadcast(properties);
-            };
-    
-            /**
              * Verifies a Broadcast message.
              * @function verify
              * @memberof v1.Broadcast
@@ -184,6 +172,214 @@
             return Broadcast;
         })();
     
+        v1.Credentials = (function() {
+    
+            /**
+             * Properties of a Credentials.
+             * @memberof v1
+             * @interface ICredentials
+             * @property {string} id Credentials id
+             * @property {string} email Credentials email
+             * @property {Array.<string>|null} [roles] Credentials roles
+             * @property {Array.<string>|null} [groups] Credentials groups
+             * @property {Array.<string>|null} [workspaces] Credentials workspaces
+             */
+    
+            /**
+             * Constructs a new Credentials.
+             * @memberof v1
+             * @classdesc Represents a Credentials.
+             * @implements ICredentials
+             * @constructor
+             * @param {v1.ICredentials=} [properties] Properties to set
+             */
+            function Credentials(properties) {
+                this.roles = [];
+                this.groups = [];
+                this.workspaces = [];
+                if (properties)
+                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                        if (properties[keys[i]] != null)
+                            this[keys[i]] = properties[keys[i]];
+            }
+    
+            /**
+             * Credentials id.
+             * @member {string} id
+             * @memberof v1.Credentials
+             * @instance
+             */
+            Credentials.prototype.id = "";
+    
+            /**
+             * Credentials email.
+             * @member {string} email
+             * @memberof v1.Credentials
+             * @instance
+             */
+            Credentials.prototype.email = "";
+    
+            /**
+             * Credentials roles.
+             * @member {Array.<string>} roles
+             * @memberof v1.Credentials
+             * @instance
+             */
+            Credentials.prototype.roles = $util.emptyArray;
+    
+            /**
+             * Credentials groups.
+             * @member {Array.<string>} groups
+             * @memberof v1.Credentials
+             * @instance
+             */
+            Credentials.prototype.groups = $util.emptyArray;
+    
+            /**
+             * Credentials workspaces.
+             * @member {Array.<string>} workspaces
+             * @memberof v1.Credentials
+             * @instance
+             */
+            Credentials.prototype.workspaces = $util.emptyArray;
+    
+            /**
+             * Verifies a Credentials message.
+             * @function verify
+             * @memberof v1.Credentials
+             * @static
+             * @param {Object.<string,*>} message Plain object to verify
+             * @returns {string|null} `null` if valid, otherwise the reason why it is not
+             */
+            Credentials.verify = function verify(message) {
+                if (typeof message !== "object" || message === null)
+                    return "object expected";
+                if (!$util.isString(message.id))
+                    return "id: string expected";
+                if (!$util.isString(message.email))
+                    return "email: string expected";
+                if (message.roles != null && message.hasOwnProperty("roles")) {
+                    if (!Array.isArray(message.roles))
+                        return "roles: array expected";
+                    for (var i = 0; i < message.roles.length; ++i)
+                        if (!$util.isString(message.roles[i]))
+                            return "roles: string[] expected";
+                }
+                if (message.groups != null && message.hasOwnProperty("groups")) {
+                    if (!Array.isArray(message.groups))
+                        return "groups: array expected";
+                    for (var i = 0; i < message.groups.length; ++i)
+                        if (!$util.isString(message.groups[i]))
+                            return "groups: string[] expected";
+                }
+                if (message.workspaces != null && message.hasOwnProperty("workspaces")) {
+                    if (!Array.isArray(message.workspaces))
+                        return "workspaces: array expected";
+                    for (var i = 0; i < message.workspaces.length; ++i)
+                        if (!$util.isString(message.workspaces[i]))
+                            return "workspaces: string[] expected";
+                }
+                return null;
+            };
+    
+            /**
+             * Creates a Credentials message from a plain object. Also converts values to their respective internal types.
+             * @function fromObject
+             * @memberof v1.Credentials
+             * @static
+             * @param {Object.<string,*>} object Plain object
+             * @returns {v1.Credentials} Credentials
+             */
+            Credentials.fromObject = function fromObject(object) {
+                if (object instanceof $root.v1.Credentials)
+                    return object;
+                var message = new $root.v1.Credentials();
+                if (object.id != null)
+                    message.id = String(object.id);
+                if (object.email != null)
+                    message.email = String(object.email);
+                if (object.roles) {
+                    if (!Array.isArray(object.roles))
+                        throw TypeError(".v1.Credentials.roles: array expected");
+                    message.roles = [];
+                    for (var i = 0; i < object.roles.length; ++i)
+                        message.roles[i] = String(object.roles[i]);
+                }
+                if (object.groups) {
+                    if (!Array.isArray(object.groups))
+                        throw TypeError(".v1.Credentials.groups: array expected");
+                    message.groups = [];
+                    for (var i = 0; i < object.groups.length; ++i)
+                        message.groups[i] = String(object.groups[i]);
+                }
+                if (object.workspaces) {
+                    if (!Array.isArray(object.workspaces))
+                        throw TypeError(".v1.Credentials.workspaces: array expected");
+                    message.workspaces = [];
+                    for (var i = 0; i < object.workspaces.length; ++i)
+                        message.workspaces[i] = String(object.workspaces[i]);
+                }
+                return message;
+            };
+    
+            /**
+             * Creates a plain object from a Credentials message. Also converts values to other types if specified.
+             * @function toObject
+             * @memberof v1.Credentials
+             * @static
+             * @param {v1.Credentials} message Credentials
+             * @param {$protobuf.IConversionOptions} [options] Conversion options
+             * @returns {Object.<string,*>} Plain object
+             */
+            Credentials.toObject = function toObject(message, options) {
+                if (!options)
+                    options = {};
+                var object = {};
+                if (options.arrays || options.defaults) {
+                    object.roles = [];
+                    object.groups = [];
+                    object.workspaces = [];
+                }
+                if (options.defaults) {
+                    object.id = "";
+                    object.email = "";
+                }
+                if (message.id != null && message.hasOwnProperty("id"))
+                    object.id = message.id;
+                if (message.email != null && message.hasOwnProperty("email"))
+                    object.email = message.email;
+                if (message.roles && message.roles.length) {
+                    object.roles = [];
+                    for (var j = 0; j < message.roles.length; ++j)
+                        object.roles[j] = message.roles[j];
+                }
+                if (message.groups && message.groups.length) {
+                    object.groups = [];
+                    for (var j = 0; j < message.groups.length; ++j)
+                        object.groups[j] = message.groups[j];
+                }
+                if (message.workspaces && message.workspaces.length) {
+                    object.workspaces = [];
+                    for (var j = 0; j < message.workspaces.length; ++j)
+                        object.workspaces[j] = message.workspaces[j];
+                }
+                return object;
+            };
+    
+            /**
+             * Converts this Credentials to JSON.
+             * @function toJSON
+             * @memberof v1.Credentials
+             * @instance
+             * @returns {Object.<string,*>} JSON object
+             */
+            Credentials.prototype.toJSON = function toJSON() {
+                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+            };
+    
+            return Credentials;
+        })();
+    
         v1.NotificationCreateOk = (function() {
     
             /**
@@ -215,18 +411,6 @@
              * @instance
              */
             NotificationCreateOk.prototype.notification = null;
-    
-            /**
-             * Creates a new NotificationCreateOk instance using the specified properties.
-             * @function create
-             * @memberof v1.NotificationCreateOk
-             * @static
-             * @param {v1.INotificationCreateOk=} [properties] Properties to set
-             * @returns {v1.NotificationCreateOk} NotificationCreateOk instance
-             */
-            NotificationCreateOk.create = function create(properties) {
-                return new NotificationCreateOk(properties);
-            };
     
             /**
              * Verifies a NotificationCreateOk message.
@@ -368,18 +552,6 @@
              * @instance
              */
             Notification.prototype.metadata = "";
-    
-            /**
-             * Creates a new Notification instance using the specified properties.
-             * @function create
-             * @memberof v1.Notification
-             * @static
-             * @param {v1.INotification=} [properties] Properties to set
-             * @returns {v1.Notification} Notification instance
-             */
-            Notification.create = function create(properties) {
-                return new Notification(properties);
-            };
     
             /**
              * Verifies a Notification message.
@@ -530,18 +702,6 @@
             UserCreate.prototype.password = "";
     
             /**
-             * Creates a new UserCreate instance using the specified properties.
-             * @function create
-             * @memberof v1.UserCreate
-             * @static
-             * @param {v1.IUserCreate=} [properties] Properties to set
-             * @returns {v1.UserCreate} UserCreate instance
-             */
-            UserCreate.create = function create(properties) {
-                return new UserCreate(properties);
-            };
-    
-            /**
              * Verifies a UserCreate message.
              * @function verify
              * @memberof v1.UserCreate
@@ -656,18 +816,6 @@
             UserCreateOk.prototype.user = null;
     
             /**
-             * Creates a new UserCreateOk instance using the specified properties.
-             * @function create
-             * @memberof v1.UserCreateOk
-             * @static
-             * @param {v1.IUserCreateOk=} [properties] Properties to set
-             * @returns {v1.UserCreateOk} UserCreateOk instance
-             */
-            UserCreateOk.create = function create(properties) {
-                return new UserCreateOk(properties);
-            };
-    
-            /**
              * Verifies a UserCreateOk message.
              * @function verify
              * @memberof v1.UserCreateOk
@@ -740,6 +888,420 @@
             return UserCreateOk;
         })();
     
+        v1.UserUpdate = (function() {
+    
+            /**
+             * Properties of a UserUpdate.
+             * @memberof v1
+             * @interface IUserUpdate
+             * @property {v1.ICredentials} credentials UserUpdate credentials
+             * @property {v1.IUserUpdatePayload} update UserUpdate update
+             */
+    
+            /**
+             * Constructs a new UserUpdate.
+             * @memberof v1
+             * @classdesc Represents a UserUpdate.
+             * @implements IUserUpdate
+             * @constructor
+             * @param {v1.IUserUpdate=} [properties] Properties to set
+             */
+            function UserUpdate(properties) {
+                if (properties)
+                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                        if (properties[keys[i]] != null)
+                            this[keys[i]] = properties[keys[i]];
+            }
+    
+            /**
+             * UserUpdate credentials.
+             * @member {v1.ICredentials} credentials
+             * @memberof v1.UserUpdate
+             * @instance
+             */
+            UserUpdate.prototype.credentials = null;
+    
+            /**
+             * UserUpdate update.
+             * @member {v1.IUserUpdatePayload} update
+             * @memberof v1.UserUpdate
+             * @instance
+             */
+            UserUpdate.prototype.update = null;
+    
+            /**
+             * Verifies a UserUpdate message.
+             * @function verify
+             * @memberof v1.UserUpdate
+             * @static
+             * @param {Object.<string,*>} message Plain object to verify
+             * @returns {string|null} `null` if valid, otherwise the reason why it is not
+             */
+            UserUpdate.verify = function verify(message) {
+                if (typeof message !== "object" || message === null)
+                    return "object expected";
+                {
+                    var error = $root.v1.Credentials.verify(message.credentials);
+                    if (error)
+                        return "credentials." + error;
+                }
+                {
+                    var error = $root.v1.UserUpdatePayload.verify(message.update);
+                    if (error)
+                        return "update." + error;
+                }
+                return null;
+            };
+    
+            /**
+             * Creates a UserUpdate message from a plain object. Also converts values to their respective internal types.
+             * @function fromObject
+             * @memberof v1.UserUpdate
+             * @static
+             * @param {Object.<string,*>} object Plain object
+             * @returns {v1.UserUpdate} UserUpdate
+             */
+            UserUpdate.fromObject = function fromObject(object) {
+                if (object instanceof $root.v1.UserUpdate)
+                    return object;
+                var message = new $root.v1.UserUpdate();
+                if (object.credentials != null) {
+                    if (typeof object.credentials !== "object")
+                        throw TypeError(".v1.UserUpdate.credentials: object expected");
+                    message.credentials = $root.v1.Credentials.fromObject(object.credentials);
+                }
+                if (object.update != null) {
+                    if (typeof object.update !== "object")
+                        throw TypeError(".v1.UserUpdate.update: object expected");
+                    message.update = $root.v1.UserUpdatePayload.fromObject(object.update);
+                }
+                return message;
+            };
+    
+            /**
+             * Creates a plain object from a UserUpdate message. Also converts values to other types if specified.
+             * @function toObject
+             * @memberof v1.UserUpdate
+             * @static
+             * @param {v1.UserUpdate} message UserUpdate
+             * @param {$protobuf.IConversionOptions} [options] Conversion options
+             * @returns {Object.<string,*>} Plain object
+             */
+            UserUpdate.toObject = function toObject(message, options) {
+                if (!options)
+                    options = {};
+                var object = {};
+                if (options.defaults) {
+                    object.credentials = null;
+                    object.update = null;
+                }
+                if (message.credentials != null && message.hasOwnProperty("credentials"))
+                    object.credentials = $root.v1.Credentials.toObject(message.credentials, options);
+                if (message.update != null && message.hasOwnProperty("update"))
+                    object.update = $root.v1.UserUpdatePayload.toObject(message.update, options);
+                return object;
+            };
+    
+            /**
+             * Converts this UserUpdate to JSON.
+             * @function toJSON
+             * @memberof v1.UserUpdate
+             * @instance
+             * @returns {Object.<string,*>} JSON object
+             */
+            UserUpdate.prototype.toJSON = function toJSON() {
+                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+            };
+    
+            return UserUpdate;
+        })();
+    
+        v1.UserUpdatePayload = (function() {
+    
+            /**
+             * Properties of a UserUpdatePayload.
+             * @memberof v1
+             * @interface IUserUpdatePayload
+             * @property {string|null} [name] UserUpdatePayload name
+             * @property {string|null} [email] UserUpdatePayload email
+             * @property {string|null} [password] UserUpdatePayload password
+             */
+    
+            /**
+             * Constructs a new UserUpdatePayload.
+             * @memberof v1
+             * @classdesc Represents a UserUpdatePayload.
+             * @implements IUserUpdatePayload
+             * @constructor
+             * @param {v1.IUserUpdatePayload=} [properties] Properties to set
+             */
+            function UserUpdatePayload(properties) {
+                if (properties)
+                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                        if (properties[keys[i]] != null)
+                            this[keys[i]] = properties[keys[i]];
+            }
+    
+            /**
+             * UserUpdatePayload name.
+             * @member {string} name
+             * @memberof v1.UserUpdatePayload
+             * @instance
+             */
+            UserUpdatePayload.prototype.name = "";
+    
+            /**
+             * UserUpdatePayload email.
+             * @member {string} email
+             * @memberof v1.UserUpdatePayload
+             * @instance
+             */
+            UserUpdatePayload.prototype.email = "";
+    
+            /**
+             * UserUpdatePayload password.
+             * @member {string} password
+             * @memberof v1.UserUpdatePayload
+             * @instance
+             */
+            UserUpdatePayload.prototype.password = "";
+    
+            // OneOf field names bound to virtual getters and setters
+            var $oneOfFields;
+    
+            /**
+             * UserUpdatePayload update.
+             * @member {"name"|"email"|"password"|undefined} update
+             * @memberof v1.UserUpdatePayload
+             * @instance
+             */
+            Object.defineProperty(UserUpdatePayload.prototype, "update", {
+                get: $util.oneOfGetter($oneOfFields = ["name", "email", "password"]),
+                set: $util.oneOfSetter($oneOfFields)
+            });
+    
+            /**
+             * Verifies a UserUpdatePayload message.
+             * @function verify
+             * @memberof v1.UserUpdatePayload
+             * @static
+             * @param {Object.<string,*>} message Plain object to verify
+             * @returns {string|null} `null` if valid, otherwise the reason why it is not
+             */
+            UserUpdatePayload.verify = function verify(message) {
+                if (typeof message !== "object" || message === null)
+                    return "object expected";
+                var properties = {};
+                if (message.name != null && message.hasOwnProperty("name")) {
+                    properties.update = 1;
+                    if (!$util.isString(message.name))
+                        return "name: string expected";
+                }
+                if (message.email != null && message.hasOwnProperty("email")) {
+                    if (properties.update === 1)
+                        return "update: multiple values";
+                    properties.update = 1;
+                    if (!$util.isString(message.email))
+                        return "email: string expected";
+                }
+                if (message.password != null && message.hasOwnProperty("password")) {
+                    if (properties.update === 1)
+                        return "update: multiple values";
+                    properties.update = 1;
+                    if (!$util.isString(message.password))
+                        return "password: string expected";
+                }
+                return null;
+            };
+    
+            /**
+             * Creates a UserUpdatePayload message from a plain object. Also converts values to their respective internal types.
+             * @function fromObject
+             * @memberof v1.UserUpdatePayload
+             * @static
+             * @param {Object.<string,*>} object Plain object
+             * @returns {v1.UserUpdatePayload} UserUpdatePayload
+             */
+            UserUpdatePayload.fromObject = function fromObject(object) {
+                if (object instanceof $root.v1.UserUpdatePayload)
+                    return object;
+                var message = new $root.v1.UserUpdatePayload();
+                if (object.name != null)
+                    message.name = String(object.name);
+                if (object.email != null)
+                    message.email = String(object.email);
+                if (object.password != null)
+                    message.password = String(object.password);
+                return message;
+            };
+    
+            /**
+             * Creates a plain object from a UserUpdatePayload message. Also converts values to other types if specified.
+             * @function toObject
+             * @memberof v1.UserUpdatePayload
+             * @static
+             * @param {v1.UserUpdatePayload} message UserUpdatePayload
+             * @param {$protobuf.IConversionOptions} [options] Conversion options
+             * @returns {Object.<string,*>} Plain object
+             */
+            UserUpdatePayload.toObject = function toObject(message, options) {
+                if (!options)
+                    options = {};
+                var object = {};
+                if (message.name != null && message.hasOwnProperty("name")) {
+                    object.name = message.name;
+                    if (options.oneofs)
+                        object.update = "name";
+                }
+                if (message.email != null && message.hasOwnProperty("email")) {
+                    object.email = message.email;
+                    if (options.oneofs)
+                        object.update = "email";
+                }
+                if (message.password != null && message.hasOwnProperty("password")) {
+                    object.password = message.password;
+                    if (options.oneofs)
+                        object.update = "password";
+                }
+                return object;
+            };
+    
+            /**
+             * Converts this UserUpdatePayload to JSON.
+             * @function toJSON
+             * @memberof v1.UserUpdatePayload
+             * @instance
+             * @returns {Object.<string,*>} JSON object
+             */
+            UserUpdatePayload.prototype.toJSON = function toJSON() {
+                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+            };
+    
+            return UserUpdatePayload;
+        })();
+    
+        v1.UserUpdateOk = (function() {
+    
+            /**
+             * Properties of a UserUpdateOk.
+             * @memberof v1
+             * @interface IUserUpdateOk
+             * @property {string} userId UserUpdateOk userId
+             * @property {v1.IUserUpdatePayload} update UserUpdateOk update
+             */
+    
+            /**
+             * Constructs a new UserUpdateOk.
+             * @memberof v1
+             * @classdesc Represents a UserUpdateOk.
+             * @implements IUserUpdateOk
+             * @constructor
+             * @param {v1.IUserUpdateOk=} [properties] Properties to set
+             */
+            function UserUpdateOk(properties) {
+                if (properties)
+                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                        if (properties[keys[i]] != null)
+                            this[keys[i]] = properties[keys[i]];
+            }
+    
+            /**
+             * UserUpdateOk userId.
+             * @member {string} userId
+             * @memberof v1.UserUpdateOk
+             * @instance
+             */
+            UserUpdateOk.prototype.userId = "";
+    
+            /**
+             * UserUpdateOk update.
+             * @member {v1.IUserUpdatePayload} update
+             * @memberof v1.UserUpdateOk
+             * @instance
+             */
+            UserUpdateOk.prototype.update = null;
+    
+            /**
+             * Verifies a UserUpdateOk message.
+             * @function verify
+             * @memberof v1.UserUpdateOk
+             * @static
+             * @param {Object.<string,*>} message Plain object to verify
+             * @returns {string|null} `null` if valid, otherwise the reason why it is not
+             */
+            UserUpdateOk.verify = function verify(message) {
+                if (typeof message !== "object" || message === null)
+                    return "object expected";
+                if (!$util.isString(message.userId))
+                    return "userId: string expected";
+                {
+                    var error = $root.v1.UserUpdatePayload.verify(message.update);
+                    if (error)
+                        return "update." + error;
+                }
+                return null;
+            };
+    
+            /**
+             * Creates a UserUpdateOk message from a plain object. Also converts values to their respective internal types.
+             * @function fromObject
+             * @memberof v1.UserUpdateOk
+             * @static
+             * @param {Object.<string,*>} object Plain object
+             * @returns {v1.UserUpdateOk} UserUpdateOk
+             */
+            UserUpdateOk.fromObject = function fromObject(object) {
+                if (object instanceof $root.v1.UserUpdateOk)
+                    return object;
+                var message = new $root.v1.UserUpdateOk();
+                if (object.userId != null)
+                    message.userId = String(object.userId);
+                if (object.update != null) {
+                    if (typeof object.update !== "object")
+                        throw TypeError(".v1.UserUpdateOk.update: object expected");
+                    message.update = $root.v1.UserUpdatePayload.fromObject(object.update);
+                }
+                return message;
+            };
+    
+            /**
+             * Creates a plain object from a UserUpdateOk message. Also converts values to other types if specified.
+             * @function toObject
+             * @memberof v1.UserUpdateOk
+             * @static
+             * @param {v1.UserUpdateOk} message UserUpdateOk
+             * @param {$protobuf.IConversionOptions} [options] Conversion options
+             * @returns {Object.<string,*>} Plain object
+             */
+            UserUpdateOk.toObject = function toObject(message, options) {
+                if (!options)
+                    options = {};
+                var object = {};
+                if (options.defaults) {
+                    object.userId = "";
+                    object.update = null;
+                }
+                if (message.userId != null && message.hasOwnProperty("userId"))
+                    object.userId = message.userId;
+                if (message.update != null && message.hasOwnProperty("update"))
+                    object.update = $root.v1.UserUpdatePayload.toObject(message.update, options);
+                return object;
+            };
+    
+            /**
+             * Converts this UserUpdateOk to JSON.
+             * @function toJSON
+             * @memberof v1.UserUpdateOk
+             * @instance
+             * @returns {Object.<string,*>} JSON object
+             */
+            UserUpdateOk.prototype.toJSON = function toJSON() {
+                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+            };
+    
+            return UserUpdateOk;
+        })();
+    
         v1.UserLogin = (function() {
     
             /**
@@ -780,18 +1342,6 @@
              * @instance
              */
             UserLogin.prototype.password = "";
-    
-            /**
-             * Creates a new UserLogin instance using the specified properties.
-             * @function create
-             * @memberof v1.UserLogin
-             * @static
-             * @param {v1.IUserLogin=} [properties] Properties to set
-             * @returns {v1.UserLogin} UserLogin instance
-             */
-            UserLogin.create = function create(properties) {
-                return new UserLogin(properties);
-            };
     
             /**
              * Verifies a UserLogin message.
@@ -899,18 +1449,6 @@
              * @instance
              */
             UserLoginOk.prototype.user = null;
-    
-            /**
-             * Creates a new UserLoginOk instance using the specified properties.
-             * @function create
-             * @memberof v1.UserLoginOk
-             * @static
-             * @param {v1.IUserLoginOk=} [properties] Properties to set
-             * @returns {v1.UserLoginOk} UserLoginOk instance
-             */
-            UserLoginOk.create = function create(properties) {
-                return new UserLoginOk(properties);
-            };
     
             /**
              * Verifies a UserLoginOk message.
@@ -1025,18 +1563,6 @@
              * @instance
              */
             UserCreatedOrLoggedInReply.prototype.token = "";
-    
-            /**
-             * Creates a new UserCreatedOrLoggedInReply instance using the specified properties.
-             * @function create
-             * @memberof v1.UserCreatedOrLoggedInReply
-             * @static
-             * @param {v1.IUserCreatedOrLoggedInReply=} [properties] Properties to set
-             * @returns {v1.UserCreatedOrLoggedInReply} UserCreatedOrLoggedInReply instance
-             */
-            UserCreatedOrLoggedInReply.create = function create(properties) {
-                return new UserCreatedOrLoggedInReply(properties);
-            };
     
             /**
              * Verifies a UserCreatedOrLoggedInReply message.
@@ -1168,18 +1694,6 @@
              * @instance
              */
             User.prototype.email = "";
-    
-            /**
-             * Creates a new User instance using the specified properties.
-             * @function create
-             * @memberof v1.User
-             * @static
-             * @param {v1.IUser=} [properties] Properties to set
-             * @returns {v1.User} User instance
-             */
-            User.create = function create(properties) {
-                return new User(properties);
-            };
     
             /**
              * Verifies a User message.

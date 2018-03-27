@@ -35,13 +35,6 @@ export namespace v1 {
         public targets: string[];
 
         /**
-         * Creates a new Broadcast instance using the specified properties.
-         * @param [properties] Properties to set
-         * @returns Broadcast instance
-         */
-        public static create(properties?: v1.IBroadcast): v1.Broadcast;
-
-        /**
          * Verifies a Broadcast message.
          * @param message Plain object to verify
          * @returns `null` if valid, otherwise the reason why it is not
@@ -70,6 +63,78 @@ export namespace v1 {
         public toJSON(): { [k: string]: any };
     }
 
+    /** Properties of a Credentials. */
+    interface ICredentials {
+
+        /** Credentials id */
+        id: string;
+
+        /** Credentials email */
+        email: string;
+
+        /** Credentials roles */
+        roles?: (string[]|null);
+
+        /** Credentials groups */
+        groups?: (string[]|null);
+
+        /** Credentials workspaces */
+        workspaces?: (string[]|null);
+    }
+
+    /** Represents a Credentials. */
+    class Credentials implements ICredentials {
+
+        /**
+         * Constructs a new Credentials.
+         * @param [properties] Properties to set
+         */
+        constructor(properties?: v1.ICredentials);
+
+        /** Credentials id. */
+        public id: string;
+
+        /** Credentials email. */
+        public email: string;
+
+        /** Credentials roles. */
+        public roles: string[];
+
+        /** Credentials groups. */
+        public groups: string[];
+
+        /** Credentials workspaces. */
+        public workspaces: string[];
+
+        /**
+         * Verifies a Credentials message.
+         * @param message Plain object to verify
+         * @returns `null` if valid, otherwise the reason why it is not
+         */
+        public static verify(message: { [k: string]: any }): (string|null);
+
+        /**
+         * Creates a Credentials message from a plain object. Also converts values to their respective internal types.
+         * @param object Plain object
+         * @returns Credentials
+         */
+        public static fromObject(object: { [k: string]: any }): v1.Credentials;
+
+        /**
+         * Creates a plain object from a Credentials message. Also converts values to other types if specified.
+         * @param message Credentials
+         * @param [options] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(message: v1.Credentials, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+        /**
+         * Converts this Credentials to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
+    }
+
     /** Properties of a NotificationCreateOk. */
     interface INotificationCreateOk {
 
@@ -88,13 +153,6 @@ export namespace v1 {
 
         /** NotificationCreateOk notification. */
         public notification: v1.INotification;
-
-        /**
-         * Creates a new NotificationCreateOk instance using the specified properties.
-         * @param [properties] Properties to set
-         * @returns NotificationCreateOk instance
-         */
-        public static create(properties?: v1.INotificationCreateOk): v1.NotificationCreateOk;
 
         /**
          * Verifies a NotificationCreateOk message.
@@ -169,13 +227,6 @@ export namespace v1 {
         public metadata: string;
 
         /**
-         * Creates a new Notification instance using the specified properties.
-         * @param [properties] Properties to set
-         * @returns Notification instance
-         */
-        public static create(properties?: v1.INotification): v1.Notification;
-
-        /**
          * Verifies a Notification message.
          * @param message Plain object to verify
          * @returns `null` if valid, otherwise the reason why it is not
@@ -236,13 +287,6 @@ export namespace v1 {
         public password: string;
 
         /**
-         * Creates a new UserCreate instance using the specified properties.
-         * @param [properties] Properties to set
-         * @returns UserCreate instance
-         */
-        public static create(properties?: v1.IUserCreate): v1.UserCreate;
-
-        /**
          * Verifies a UserCreate message.
          * @param message Plain object to verify
          * @returns `null` if valid, otherwise the reason why it is not
@@ -291,13 +335,6 @@ export namespace v1 {
         public user: v1.IUser;
 
         /**
-         * Creates a new UserCreateOk instance using the specified properties.
-         * @param [properties] Properties to set
-         * @returns UserCreateOk instance
-         */
-        public static create(properties?: v1.IUserCreateOk): v1.UserCreateOk;
-
-        /**
          * Verifies a UserCreateOk message.
          * @param message Plain object to verify
          * @returns `null` if valid, otherwise the reason why it is not
@@ -321,6 +358,177 @@ export namespace v1 {
 
         /**
          * Converts this UserCreateOk to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
+    }
+
+    /** Properties of a UserUpdate. */
+    interface IUserUpdate {
+
+        /** UserUpdate credentials */
+        credentials: v1.ICredentials;
+
+        /** UserUpdate update */
+        update: v1.IUserUpdatePayload;
+    }
+
+    /** Represents a UserUpdate. */
+    class UserUpdate implements IUserUpdate {
+
+        /**
+         * Constructs a new UserUpdate.
+         * @param [properties] Properties to set
+         */
+        constructor(properties?: v1.IUserUpdate);
+
+        /** UserUpdate credentials. */
+        public credentials: v1.ICredentials;
+
+        /** UserUpdate update. */
+        public update: v1.IUserUpdatePayload;
+
+        /**
+         * Verifies a UserUpdate message.
+         * @param message Plain object to verify
+         * @returns `null` if valid, otherwise the reason why it is not
+         */
+        public static verify(message: { [k: string]: any }): (string|null);
+
+        /**
+         * Creates a UserUpdate message from a plain object. Also converts values to their respective internal types.
+         * @param object Plain object
+         * @returns UserUpdate
+         */
+        public static fromObject(object: { [k: string]: any }): v1.UserUpdate;
+
+        /**
+         * Creates a plain object from a UserUpdate message. Also converts values to other types if specified.
+         * @param message UserUpdate
+         * @param [options] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(message: v1.UserUpdate, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+        /**
+         * Converts this UserUpdate to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
+    }
+
+    /** Properties of a UserUpdatePayload. */
+    interface IUserUpdatePayload {
+
+        /** UserUpdatePayload name */
+        name?: (string|null);
+
+        /** UserUpdatePayload email */
+        email?: (string|null);
+
+        /** UserUpdatePayload password */
+        password?: (string|null);
+    }
+
+    /** Represents a UserUpdatePayload. */
+    class UserUpdatePayload implements IUserUpdatePayload {
+
+        /**
+         * Constructs a new UserUpdatePayload.
+         * @param [properties] Properties to set
+         */
+        constructor(properties?: v1.IUserUpdatePayload);
+
+        /** UserUpdatePayload name. */
+        public name: string;
+
+        /** UserUpdatePayload email. */
+        public email: string;
+
+        /** UserUpdatePayload password. */
+        public password: string;
+
+        /** UserUpdatePayload update. */
+        public update?: ("name"|"email"|"password");
+
+        /**
+         * Verifies a UserUpdatePayload message.
+         * @param message Plain object to verify
+         * @returns `null` if valid, otherwise the reason why it is not
+         */
+        public static verify(message: { [k: string]: any }): (string|null);
+
+        /**
+         * Creates a UserUpdatePayload message from a plain object. Also converts values to their respective internal types.
+         * @param object Plain object
+         * @returns UserUpdatePayload
+         */
+        public static fromObject(object: { [k: string]: any }): v1.UserUpdatePayload;
+
+        /**
+         * Creates a plain object from a UserUpdatePayload message. Also converts values to other types if specified.
+         * @param message UserUpdatePayload
+         * @param [options] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(message: v1.UserUpdatePayload, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+        /**
+         * Converts this UserUpdatePayload to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
+    }
+
+    /** Properties of a UserUpdateOk. */
+    interface IUserUpdateOk {
+
+        /** UserUpdateOk userId */
+        userId: string;
+
+        /** UserUpdateOk update */
+        update: v1.IUserUpdatePayload;
+    }
+
+    /** Represents a UserUpdateOk. */
+    class UserUpdateOk implements IUserUpdateOk {
+
+        /**
+         * Constructs a new UserUpdateOk.
+         * @param [properties] Properties to set
+         */
+        constructor(properties?: v1.IUserUpdateOk);
+
+        /** UserUpdateOk userId. */
+        public userId: string;
+
+        /** UserUpdateOk update. */
+        public update: v1.IUserUpdatePayload;
+
+        /**
+         * Verifies a UserUpdateOk message.
+         * @param message Plain object to verify
+         * @returns `null` if valid, otherwise the reason why it is not
+         */
+        public static verify(message: { [k: string]: any }): (string|null);
+
+        /**
+         * Creates a UserUpdateOk message from a plain object. Also converts values to their respective internal types.
+         * @param object Plain object
+         * @returns UserUpdateOk
+         */
+        public static fromObject(object: { [k: string]: any }): v1.UserUpdateOk;
+
+        /**
+         * Creates a plain object from a UserUpdateOk message. Also converts values to other types if specified.
+         * @param message UserUpdateOk
+         * @param [options] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(message: v1.UserUpdateOk, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+        /**
+         * Converts this UserUpdateOk to JSON.
          * @returns JSON object
          */
         public toJSON(): { [k: string]: any };
@@ -350,13 +558,6 @@ export namespace v1 {
 
         /** UserLogin password. */
         public password: string;
-
-        /**
-         * Creates a new UserLogin instance using the specified properties.
-         * @param [properties] Properties to set
-         * @returns UserLogin instance
-         */
-        public static create(properties?: v1.IUserLogin): v1.UserLogin;
 
         /**
          * Verifies a UserLogin message.
@@ -405,13 +606,6 @@ export namespace v1 {
 
         /** UserLoginOk user. */
         public user: v1.IUser;
-
-        /**
-         * Creates a new UserLoginOk instance using the specified properties.
-         * @param [properties] Properties to set
-         * @returns UserLoginOk instance
-         */
-        public static create(properties?: v1.IUserLoginOk): v1.UserLoginOk;
 
         /**
          * Verifies a UserLoginOk message.
@@ -466,13 +660,6 @@ export namespace v1 {
 
         /** UserCreatedOrLoggedInReply token. */
         public token: string;
-
-        /**
-         * Creates a new UserCreatedOrLoggedInReply instance using the specified properties.
-         * @param [properties] Properties to set
-         * @returns UserCreatedOrLoggedInReply instance
-         */
-        public static create(properties?: v1.IUserCreatedOrLoggedInReply): v1.UserCreatedOrLoggedInReply;
 
         /**
          * Verifies a UserCreatedOrLoggedInReply message.
@@ -533,13 +720,6 @@ export namespace v1 {
 
         /** User email. */
         public email: string;
-
-        /**
-         * Creates a new User instance using the specified properties.
-         * @param [properties] Properties to set
-         * @returns User instance
-         */
-        public static create(properties?: v1.IUser): v1.User;
 
         /**
          * Verifies a User message.

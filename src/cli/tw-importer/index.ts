@@ -1,5 +1,5 @@
 import {
-  getConnection,
+  getRemoteConnection,
   getLocalConnection,
 } from '../../lib/mongo'
 import {
@@ -27,19 +27,19 @@ async function run (opts: any) {
     
     if (opts.export) {
       if (opts.tasks) {
-        remote = await getConnection()
+        remote = await getRemoteConnection()
         local = await getLocalConnection()
         await Tasks.exportTasks(remote.db, local.db, opts)
         return
       }
       else if (opts.metadata) {
-        remote = await getConnection()
+        remote = await getRemoteConnection()
         local = await getLocalConnection()
         await Tasks.exportTasksMetadata(remote.db, local.db)
         return
       }
       else if (opts.credentials) {
-        remote = await getConnection()
+        remote = await getRemoteConnection()
         local = await getLocalConnection()
         await Credentials.exportCredentials(remote.db, local.db)
         return
@@ -54,7 +54,7 @@ async function run (opts: any) {
     }
     
     if (opts['join-errors']) {
-      remote = await getConnection()
+      remote = await getRemoteConnection()
       await Tasks.confirmJoinErrors(remote.db)
       return
     }
@@ -71,7 +71,7 @@ async function run (opts: any) {
     
     if (opts.update) {
       if (opts.tasks) {
-        remote = await getConnection()
+        remote = await getRemoteConnection()
         local = await getLocalConnection()        
         await Update.updateTasks(remote.db, local.db, opts)
         return

@@ -1,6 +1,8 @@
 package v1;
 syntax = "proto3";
 
+import "./credentials.proto";
+
 message UserCreate {
   required string name = 1;
   required string email = 2;
@@ -9,6 +11,24 @@ message UserCreate {
 
 message UserCreateOk {
   required User user = 1;
+}
+
+message UserUpdate {
+  required Credentials credentials = 1;
+  required UserUpdatePayload update = 2;
+}
+
+message UserUpdatePayload {
+  oneof update {
+    string name = 1;
+    string email = 2;
+    string password = 3;
+  }
+}
+
+message UserUpdateOk {
+  required string userId = 1;
+  required UserUpdatePayload update = 2;
 }
 
 message UserLogin {
