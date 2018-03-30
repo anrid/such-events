@@ -12,6 +12,7 @@ export async function runService (_opts: RunServiceOptions): Promise<RunServiceR
   connections.push(stan)
 
   const sub = Nats.subscribeToEvents(stan, {
+    subject: Nats.EVENT_SOURCE_SUBJECT,
     source: opts.id,
     queueGroup: opts.group,
     eventHandlers: opts.eventHandlers,
@@ -23,7 +24,7 @@ export async function runService (_opts: RunServiceOptions): Promise<RunServiceR
   return {
     sub,
     stan,
-    isReady: sub['isReady'],
+    isReady: sub.isReady,
     close: () => stan.close(),
   }
 }

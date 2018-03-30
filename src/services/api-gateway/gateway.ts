@@ -58,25 +58,33 @@ export async function init (app: Express, clientId: string) {
 
   // Setup broadcast subscriber.
   const sub = Nats.subscribeToEvents(stan, {
+    subject: Nats.BROADCAST_SUBJECT,
     source: 'api-gateway-out',
     durable: 'api-gateway-sub',
     queueGroup: null, 
     eventHandlers: {
+      'v1.error': async e => {
+        if (waiting[e.requestId]) {
+          // Reply error to sender.
+          L.error({ message: e.data.error, request: e.requestId, event: e.data.event })
+          waiting[e.requestId](e.data)
+        }
+      },
       'v1.broadcast': async e => {
         try {
           const m = P.create(T.v1.Broadcast, e.data)
           const payload = JSON.parse(m.payload)
-          if (m.targets && m.targets.length) {
-            // Broadcast to targets, i.e. a list of user ids.
-            L.info({ message: 'broadcast', targets: m.targets, type: m.type })
-          }
-          else if (waiting[e.requestId]) {
+          if (waiting[e.requestId]) {
             // Reply to sender.
             L.info({ message: 'reply', request: e.requestId, type: m.type })
             waiting[e.requestId]({ type: m.type, payload })
           }
+          if (m.targets && m.targets.length) {
+            // TODO: Broadcast to targets, i.e. a list of user ids.
+            L.info({ message: 'broadcast', request: e.requestId, type: m.type, targets: m.targets })
+          }
         } catch (err) {
-          L.error({ message: 'bad broadcast', event: e })
+          L.error({ message: 'bad reply', event: e })
           L.error(err)
         }
       },
@@ -85,7 +93,7 @@ export async function init (app: Express, clientId: string) {
 
   return {
     sub,
-    isReady: sub['isReady'],
+    isReady: sub.isReady,
     close: () => {
       stan.close()
     }

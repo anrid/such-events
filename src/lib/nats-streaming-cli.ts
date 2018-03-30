@@ -2,6 +2,7 @@ import {
   getConnection,
   subscribeToEvents,
   publishEvent,
+  EVENT_SOURCE_SUBJECT
 } from './nats-streaming'
 import * as Crypto from 'crypto'
 
@@ -14,6 +15,7 @@ async function cli (opts: any) {
     const clientId = opts.id
     const conn = await getConnection(clientId)
     subscribeToEvents(conn, {
+      subject: EVENT_SOURCE_SUBJECT,
       source: 'cli-sub',
       queueGroup: opts.group ? opts.group : null,
       eventHandlers: {

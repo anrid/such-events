@@ -2,11 +2,12 @@ import * as test from 'tape'
 import * as H from './handlers'
 import * as P from '../../lib/proto'
 import * as T from '../../../proto/compiled'
+import { createTestEventMessage } from '../../lib/nats-streaming'
 
 test('notification-service - on v1.user.create.ok test', async t => {
   t.plan(5)
 
-  const event = {
+  const event = createTestEventMessage({
     data: P.create(T.v1.UserCreateOk, {
       user: {
         id: 'user1',
@@ -14,7 +15,7 @@ test('notification-service - on v1.user.create.ok test', async t => {
         email: 'ace@base.se',
       },
     })
-  }
+  })
 
   await H.userCreatedOkHandler(event, (publishedEvent: string, data) => {
     t.doesNotThrow(() => P.create(T.v1.NotificationCreateOk, data))

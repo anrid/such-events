@@ -3,6 +3,7 @@ import * as H from './handlers'
 import * as P from '../../lib/proto'
 import * as T from '../../../proto/compiled'
 import * as Db from './db'
+import { createTestEventMessage } from '../../lib/nats-streaming'
 
 let testSession: any = { }
 
@@ -14,13 +15,13 @@ test('user-service - before tests', async t => {
 test('user-service - on v1.user.create test', async t => {
   t.plan(6)
 
-  const event = {
+  const event = createTestEventMessage({
     data: P.create(T.v1.UserCreate, {
       name: 'Ace Base',
       email: 'ace@base.se',
       password: '123456',
     })
-  }
+  })
 
   await H.userCreateHandler(event, (publishedEvent: string, data) => {
     if (publishedEvent === 'v1.user.create.ok') {
@@ -41,12 +42,12 @@ test('user-service - on v1.user.create test', async t => {
 test('user-service - on v1.user.login test', async t => {
   t.plan(6)
 
-  const event = {
+  const event = createTestEventMessage({
     data: P.create(T.v1.UserLogin, {
       email: 'ace@base.se',
       password: '123456',
     })
-  }
+  })
 
   await H.userLoginHandler(event, (publishedEvent: string, data) => {
     if (publishedEvent === 'v1.user.login.ok') {
@@ -66,7 +67,7 @@ test('user-service - on v1.user.login test', async t => {
 test('user-service - on v1.user.update test', async t => {
   t.plan(5)
 
-  const event = {
+  const event = createTestEventMessage({
     data: P.create(T.v1.UserUpdate, {
       update: { email: 'acee@base.see' },
       credentials: {
@@ -74,7 +75,7 @@ test('user-service - on v1.user.update test', async t => {
         email: testSession.aceBase.email,
       },
     })
-  }
+  })
 
   await H.userUpdateHandler(event, (publishedEvent: string, data) => {
     if (publishedEvent === 'v1.user.update.ok') {
