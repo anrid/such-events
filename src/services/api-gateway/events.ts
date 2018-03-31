@@ -22,6 +22,11 @@ export const EVENTS: RequestToEventMap = {
       event: 'v1.echo-secret.create',
     }
   },
+  '/api/v1/echo-error': {
+    'GET': {
+      event: 'v1.echo-error.get',
+    }
+  },
   '/api/v1/slow': {
     'POST': {
       event: 'v1.slow',

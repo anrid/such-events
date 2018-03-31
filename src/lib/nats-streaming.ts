@@ -208,6 +208,13 @@ export function subscribeToEvents (conn: StanConnection, a: SubscriberOptions) {
       const handler = a.eventHandlers[e.event] || a.eventHandlers['*']
       if (!handler) return
 
+      let total = e.requestCreated ? Date.now() - e.requestCreated : 0
+      let took = 0
+      L.info({
+        tag: 'NATS', message: 'handle event', event: e.event, source: a.source,
+        seq: msg.getSequence(), client: id, request: e.requestId, total,
+      })
+
       // Create a publisher to be sent into the handler.
       publisher = createPublisher(conn, a.source, e)
 
@@ -215,30 +222,29 @@ export function subscribeToEvents (conn: StanConnection, a: SubscriberOptions) {
       await handler(e, publisher)
 
       // Measure and log how long the handler took to execute.
-      const took = Date.now() - timer
-      let total = e.requestCreated ? Date.now() - e.requestCreated : 0
+      took = Date.now() - timer
+      total = e.requestCreated ? Date.now() - e.requestCreated : 0
       L.info({
-        tag: 'NATS', message: 'event handled', event: e.event, source: e.source,
+        tag: 'NATS', message: 'event handled', event: e.event, source: a.source,
         seq: msg.getSequence(), client: id, request: e.requestId, took, total,
       })
     } catch (err) {
       // Handle errors.
       if (err instanceof SyntaxError) {
-        L.error({ tag: 'NATS', message: 'malformed event message', data: data })  
+        L.error({ tag: 'NATS', message: 'malformed event message', data })  
       }
       else {
         const event = e ? e.event : 'unknown'
-        const source = e ? e.source : 'unknown'
         const requestId = e ? e.requestId : 'none'
         
         L.error({
-          tag: 'NATS', message: 'handle event error', event, source,
+          tag: 'NATS', message: 'handle event error', event, source: a.source,
           seq: msg.getSequence(), client: id, request: requestId, error: err.message
         })
         L.error(err)
         
         // Broadcast error back to sender !
-        publisher('v1.error', { event: `${event}.error`, error: err.message }, true)
+        publisher('v1.error', { event: `${event}.error`, error: err.message, source: a.source }, true)
       }
     }
   }
@@ -270,20 +276,21 @@ async function publish (conn: StanConnection, subject: string, e: EventMessage) 
   if (!e.requestCreated) e.requestCreated = Date.now()
 
   const id = conn.clientId
-  const payload = JSON.stringify(e)
   const total = e.requestCreated ? Date.now() - e.requestCreated : 0
+  const event = e.data && e.data.type ? e.data.type : e.event
 
   L.info({
-    tag: 'NATS', message: 'publish event', event: e.event, subject,
-    source: e.source, client: id, request: e.requestId, total: total
-  })  
+    tag: 'NATS', message: 'publish event', event, subject,
+    source: e.source, client: id, request: e.requestId, total
+  })
 
   return new Promise((resolve, reject) => {
-    conn.publish(subject, payload, (err, _guid) => {
+    conn.publish(subject, JSON.stringify(e), (err, _guid) => {
       if (err) {
         L.error({
-          tag: 'NATS', message: 'publish ack timeout error', event: e.event, source: e.source,
-          client: id, request: e.requestId, data: e.data, error: err.message
+          tag: 'NATS', message: 'publish ack timeout error', event: e.event, subject, 
+          source: e.source, client: id, request: e.requestId, data: e.data,
+          error: err.message
         })
         return reject(new Error('publish ack timeout'))
       }

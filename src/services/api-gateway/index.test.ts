@@ -3,6 +3,7 @@ import * as request from 'supertest'
 import * as Server from './index'
 import * as Echo from '../echo'
 import * as Boom from 'boom'
+import * as Jwt from '../../lib/jwt'
 
 let server
 let echo
@@ -32,9 +33,38 @@ test('POST /api/v1/echo', async t => {
   .accept('json')
   .send({ ok: 1 })
 
-  t.equals(res.body.type, 'v1.echo.ok', 'should get body.type = "v1.echo.ok"')
+  t.equals(res.body.type, 'v1.echo.create.ok', 'should get body.type = "v1.echo.create.ok"')
   t.equals(res.body.payload.ok, 1, 'should get body.payload.ok = 1')
   t.equals(res.statusCode, 200, 'should get 200 OK')
+})
+
+test('POST /api/v1/echo-secret', async t => {
+  t.plan(4)
+  
+  const res = await request(server.app)
+  .post('/api/v1/echo-secret')
+  .accept('json')
+  .set('Authorization', 'Bearer ' + Jwt.createAccessToken('user1', 'ace@base.se'))
+  .send({ ok: 1 })
+
+  t.equals(res.body.type, 'v1.echo-secret.create.ok', 'should get body.type = "v1.echo-secret.create.ok"')
+  t.equals(res.body.payload.ok, 1, 'should get body.payload.ok = 1')
+  t.equals(res.body.payload.email, 'ace@base.se', 'should get body.payload.email = "ace@base.se"')
+  t.equals(res.statusCode, 200, 'should get 200 OK')
+})
+
+test('POST /api/v1/echo-error', async t => {
+  t.plan(3)
+  
+  const res = await request(server.app)
+  .get('/api/v1/echo-error')
+  .accept('json')
+  .set('Authorization', 'Bearer ' + Jwt.createAccessToken('user1', 'ace@base.se'))
+  .send()
+
+  t.equals(res.body.event, 'v1.echo-error.get.error', 'should get body.event = "v1.echo-error.get.error"')
+  t.equals(res.body.error, 'echo error', 'should get body.error = "echo error"')
+  t.equals(res.statusCode, 400, 'should get 400 BAD REQUEST')
 })
 
 test('GET /bad', async t => {

@@ -52,11 +52,12 @@ export function jwtMiddleware (req, res, next) {
   try {
     if (token) {
       const credentials = verifyAccessToken(token)
-      req[credentials] = credentials
+      // L.info({ message: 'JWT middleware parsed token', credentials })
+      req['credentials'] = credentials
     }
     next()
   } catch (err) {
-    L.error({ message: 'JWT middleware error', token: token, error: err.message })
-    return res.status(400).json({ error: 'Invalid token: ' + err.message })
+    L.error({ message: 'JWT middleware error', token, error: err.message })
+    return res.status(400).json({ error: 'invalid token: ' + err.message })
   }
 }
