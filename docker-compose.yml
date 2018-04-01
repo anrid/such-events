@@ -1,20 +1,16 @@
 version: '3.3'
 
 services:
-  orient:
-    image: orientdb:latest
-    hostname: orientdb
+  arangodb:
+    image: arangodb:latest
+    hostname: arangodb
     ports:
-      - "2424:2424"
-      - "2480:2480"
-    entrypoint:
-      - /orientdb/bin/server.sh
-      - -Dlog.console.level=FINEST
-    environment:  
-      - ORIENTDB_ROOT_PASSWORD=root
+      - "8529:8529"
+    environment:
+      - ARANGO_STORAGE_ENGINE=rocksdb
+      - ARANGO_ROOT_PASSWORD=root
     volumes:
-      - orientdb-data:/orientdb/databases
-      - orientdb-backup:/orientdb/backup
+      - arangodb-data:/var/lib/arangodb3
     networks:
       - network
 
@@ -77,12 +73,9 @@ services:
       - network
 
 volumes:
-  orientdb-data:
+  arangodb-data:
     external:
-      name: orientdb-data-volume
-  orientdb-backup:
-    external:
-      name: orientdb-backup-volume
+      name: arangodb-volume
   nats-data:
     external:
       name: nats-volume
